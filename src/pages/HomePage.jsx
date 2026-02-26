@@ -9,6 +9,78 @@ const STATS = [
 
 const TAGS = ['React', 'Python', 'AI/ML', 'Design', 'Marketing', 'DevOps', 'Node.js', 'TypeScript']
 
+
+function NewsletterSection() {
+  const [email, setEmail] = useState('')
+  const [status, setStatus] = useState('') // '', 'loading', 'success', 'error', 'already'
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!email || !email.includes('@')) return
+    setStatus('loading')
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      })
+      const data = await res.json()
+      if (data.error === 'already_subscribed') setStatus('already')
+      else if (data.success) { setStatus('success'); setEmail('') }
+      else setStatus('error')
+    } catch { setStatus('error') }
+  }
+
+  return (
+    <section style={{padding:'80px 24px',borderTop:'1px solid #141414'}}>
+      <div style={{maxWidth:600,margin:'0 auto',textAlign:'center'}}>
+        <div style={{fontSize:48,marginBottom:20}}>📬</div>
+        <h2 style={{fontFamily:"'Syne',sans-serif",fontSize:'clamp(26px,4vw,38px)',fontWeight:800,color:'#fff',letterSpacing:'-1px',marginBottom:12}}>
+          Get the best remote jobs weekly
+        </h2>
+        <p style={{color:'#888',fontSize:16,lineHeight:1.7,marginBottom:36}}>
+          Top remote opportunities, SaaS tools, and digital products — delivered to your inbox every week. No spam, ever.
+        </p>
+
+        {status === 'success' ? (
+          <div style={{background:'rgba(74,222,128,0.1)',border:'1px solid rgba(74,222,128,0.3)',borderRadius:14,padding:'20px 28px'}}>
+            <div style={{fontSize:32,marginBottom:8}}>✅</div>
+            <p style={{color:'#4ade80',fontWeight:700,fontSize:16,margin:0}}>You're subscribed! Check your inbox for a welcome email.</p>
+          </div>
+        ) : status === 'already' ? (
+          <div style={{background:'rgba(201,168,76,0.1)',border:'1px solid rgba(201,168,76,0.3)',borderRadius:14,padding:'20px 28px'}}>
+            <p style={{color:'#c9a84c',fontWeight:700,fontSize:16,margin:0}}>You're already subscribed! 🎉</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} style={{display:'flex',gap:10,maxWidth:480,margin:'0 auto',flexWrap:'wrap',justifyContent:'center'}}>
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="Enter your email address"
+              required
+              style={{flex:1,minWidth:220,background:'#111',border:'1.5px solid #2a2a2a',borderRadius:12,padding:'14px 18px',color:'#fff',fontSize:15,outline:'none',transition:'border-color 0.2s'}}
+              onFocus={e => e.target.style.borderColor='#c9a84c'}
+              onBlur={e => e.target.style.borderColor='#2a2a2a'}
+            />
+            <button
+              type="submit"
+              disabled={status === 'loading'}
+              style={{background:'linear-gradient(135deg,#c9a84c,#e8c96a)',color:'#0d0d0d',fontWeight:700,fontSize:15,border:'none',borderRadius:12,padding:'14px 28px',cursor:'pointer',opacity:status==='loading'?0.7:1,whiteSpace:'nowrap',transition:'transform 0.2s,box-shadow 0.2s'}}
+              onMouseEnter={e => { e.target.style.transform='translateY(-2px)'; e.target.style.boxShadow='0 8px 24px rgba(201,168,76,0.3)' }}
+              onMouseLeave={e => { e.target.style.transform=''; e.target.style.boxShadow='' }}
+            >
+              {status === 'loading' ? 'Subscribing...' : 'Subscribe Free →'}
+            </button>
+            {status === 'error' && <p style={{color:'#ff6b6b',fontSize:13,width:'100%',margin:'4px 0 0',textAlign:'center'}}>Something went wrong. Please try again.</p>}
+          </form>
+        )}
+        <p style={{color:'#444',fontSize:12,marginTop:16}}>Join hundreds of remote workers. Unsubscribe anytime.</p>
+      </div>
+    </section>
+  )
+}
+
 export default function HomePage() {
   const [jobs, setJobs] = useState([])
   const [tools, setTools] = useState([])
@@ -212,6 +284,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <NewsletterSection />
 
       {/* FOR EMPLOYERS CTA */}
       <section style={{ padding: '80px 24px' }}>
