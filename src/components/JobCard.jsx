@@ -24,8 +24,8 @@ export default function JobCard({ job, onOpenDetail, isHighlighted, votes = {}, 
       <div className="card-row card-top">
         <div className="logo-box">
           {job.logo
-            ? <img src={job.logo} alt="" onError={e => { e.target.style.display = 'none'; e.target.parentElement.textContent = job.emoji || '💼' }} />
-            : job.emoji || '💼'}
+            ? <img src={job.logo} alt="" onError={e => { e.target.style.display = 'none'; e.target.parentElement.textContent = job.logo || '💼' }} />
+            : job.logo || '💼'}
         </div>
         <div className="top-actions">
           {onToggleCompare && (
