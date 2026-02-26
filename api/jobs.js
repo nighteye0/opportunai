@@ -32,7 +32,7 @@ export default async function handler(req, res) {
       tags: j.tags?.slice(0, 4) || [],
       source: 'remotive',
       logo: '🌐',
-      url: j.url,
+      url: j.url || "#",
       postedAt: j.publication_date,
       upvotes: 0,
     }))
@@ -52,7 +52,7 @@ export default async function handler(req, res) {
       tags: j.tags?.slice(0, 4) || [],
       source: 'arbeitnow',
       logo: '💼',
-      url: j.url,
+      url: j.url || "#",
       postedAt: j.created_at,
       upvotes: 0,
     }))
@@ -75,7 +75,7 @@ export default async function handler(req, res) {
         tags: j.tags?.slice(0, 4) || [],
         source: 'remoteok',
         logo: '🖥️',
-        url: j.url,
+        url: j.url ? (j.url.startsWith("http") ? j.url : `https://remoteok.com${j.url}`) : "#",
         postedAt: new Date(j.epoch * 1000).toISOString(),
         upvotes: 0,
       }))
