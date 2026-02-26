@@ -81,7 +81,7 @@ export default function JobCard({ job, onOpenDetail, isHighlighted, votes = {}, 
             </button>
           )}
         </div>
-        <button className="apply-btn" onClick={e => { e.stopPropagation(); onApply?.(job) }}>
+        <button className="apply-btn" onClick={e => { e.stopPropagation(); window.open(job.url || "#", "_blank") }}>
           Apply 🚀
         </button>
       </div>
