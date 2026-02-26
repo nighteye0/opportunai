@@ -19,9 +19,9 @@ export const SRC_LABEL = {
 }
 
 const COMMUNITY_JOBS = [
-  { id: 'c1', title: 'Founding Engineer', company: 'Stealth AI Startup', location: 'SF / Remote', type: 'Full-time', salary: '$160k + equity', source: 'community', tags: ['Full-stack', 'AI', 'Startup'], posted: 'Today', emoji: '🚀', url: '#', description: 'Be the 3rd engineer at a well-funded AI startup. Generalist role — you will own multiple areas of the product.' },
-  { id: 'c2', title: 'Freelance Brand Designer', company: 'TechCo', location: 'Remote', type: 'Freelance', salary: '$75–$110/hr', source: 'community', tags: ['Branding', 'Figma', 'Illustration'], posted: 'Today', emoji: '🎨', url: '#', description: '4–6 week brand refresh project for a B2B SaaS company.' },
-  { id: 'c3', title: 'Head of Engineering', company: 'Resend', location: 'Remote', type: 'Full-time', salary: '$200k–$260k', source: 'community', tags: ['Engineering Leadership', 'Node.js'], posted: 'Today', emoji: '📧', url: '#', description: 'Lead engineering at Resend as we scale to millions of developers globally.' },
+  { id: 'c1', title: 'Founding Engineer', company: 'Stealth AI Startup', location: 'SF / Remote', type: 'Full-time', salary: '$160k + equity', source: 'community', tags: ['Full-stack', 'AI', 'Startup'], posted: 'Today', logo: '🚀', url: '#', description: 'Be the 3rd engineer at a well-funded AI startup. Generalist role — you will own multiple areas of the product.' },
+  { id: 'c2', title: 'Freelance Brand Designer', company: 'TechCo', location: 'Remote', type: 'Freelance', salary: '$75–$110/hr', source: 'community', tags: ['Branding', 'Figma', 'Illustration'], posted: 'Today', logo: '🎨', url: '#', description: '4–6 week brand refresh project for a B2B SaaS company.' },
+  { id: 'c3', title: 'Head of Engineering', company: 'Resend', location: 'Remote', type: 'Full-time', salary: '$200k–$260k', source: 'community', tags: ['Engineering Leadership', 'Node.js'], posted: 'Today', logo: '📧', url: '#', description: 'Lead engineering at Resend as we scale to millions of developers globally.' },
 ]
 
 // In production use our own serverless API, locally use corsproxy
@@ -47,7 +47,7 @@ async function fetchRemotive() {
       logo: j.company_logo,
       description: j.description?.replace(/<[^>]*>/g, '').slice(0, 300) + '...',
       source: 'remotive',
-      emoji: '🌐',
+      logo: '🌐',
     }))
   } catch { return [] }
 }
@@ -70,7 +70,7 @@ async function fetchArbeitnow() {
       logo: j.company_logo,
       description: j.description?.replace(/<[^>]*>/g, '').slice(0, 300) + '...',
       source: 'arbeitnow',
-      emoji: '🏢',
+      logo: '🏢',
     }))
   } catch { return [] }
 }
@@ -95,7 +95,7 @@ async function fetchRemoteOK() {
       logo: j.company_logo,
       description: j.description?.replace(/<[^>]*>/g, '').slice(0, 300) + '...',
       source: 'remoteok',
-      emoji: '✅',
+      logo: '✅',
     }))
   } catch { return [] }
 }
@@ -120,7 +120,7 @@ async function fetchHimalayas() {
       logo: j.companyLogo,
       description: j.description?.replace(/<[^>]*>/g, '').slice(0, 300) + '...',
       source: 'himalayas',
-      emoji: '🏔️',
+      logo: '🏔️',
     }))
   } catch { return [] }
 }
@@ -145,7 +145,7 @@ async function fetchJobicy() {
       logo: j.companyLogo,
       description: j.jobDescription?.replace(/<[^>]*>/g, '').slice(0, 300) + '...',
       source: 'jobicy',
-      emoji: '💼',
+      logo: '💼',
     }))
   } catch { return [] }
 }
