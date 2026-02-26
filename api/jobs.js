@@ -2,34 +2,13 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET')
 
-  const COMMUNITY_JOBS = [
-    {
-      id: 'c1', title: 'Founding Engineer', company: 'Stealth AI Startup',
-      location: 'SF / Remote', type: 'Full-time', salary: '$160k + equity',
-      tags: ['Full-stack', 'AI', 'Startup'], source: 'community',
-      logo: '🚀', postedAt: new Date().toISOString(), upvotes: 0,
-    },
-    {
-      id: 'c2', title: 'Freelance Brand Designer', company: 'TechCo',
-      location: 'Remote', type: 'Freelance', salary: '$75–$110/hr',
-      tags: ['Branding', 'Figma', 'Illustration'], source: 'community',
-      logo: '🎨', postedAt: new Date().toISOString(), upvotes: 0,
-    },
-    {
-      id: 'c3', title: 'Head of Engineering', company: 'Resend',
-      location: 'Remote', type: 'Full-time', salary: '$200k–$260k',
-      tags: ['Engineering Leadership', 'Node.js'], source: 'community',
-      logo: '📧', postedAt: new Date().toISOString(), upvotes: 0,
-    },
-  ]
-
   const fetches = await Promise.allSettled([
     fetch('https://remotive.com/api/remote-jobs?limit=25').then(r => r.json()),
     fetch('https://arbeitnow.com/api/job-board-api').then(r => r.json()),
     fetch('https://remoteok.com/api').then(r => r.json()),
   ])
 
-  let jobs = [...COMMUNITY_JOBS]
+  let jobs = []
 
   // Remotive
   if (fetches[0].status === 'fulfilled') {
