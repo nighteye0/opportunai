@@ -23,9 +23,11 @@ function PostPage({ onOpen }) {
   return null
 }
 
+function PageViewTracker() { usePageView(); return null }
+
 function AppInner() {
   const [showAuth, setShowAuth] = useState(null)
-  usePageView()
+
   const [showMatcher, setShowMatcher] = useState(false)
   const [showSubmit, setShowSubmit] = useState(false)
   const [showAPI, setShowAPI] = useState(false)
@@ -45,7 +47,7 @@ function AppInner() {
   const jobs = useJobs(apiKeys)
 
   return (
-    <BrowserRouter>
+    <BrowserRouter><PageViewTracker />
       <Navbar
         onOpenMatcher={() => setShowMatcher(true)}
         onOpenSubmit={() => setShowSubmit(true)}
