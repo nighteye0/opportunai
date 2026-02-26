@@ -21,6 +21,7 @@ export default function Navbar({ onOpenMatcher, onOpenSubmit, onOpenAuth }) {
     { label: 'Launches', to: '/' },
     { label: 'Post a Job', to: '/post-job' },
     { label: 'Tools', to: '/tools' },
+    { label: 'Products', to: '/products' },
   ]
 
   const isActive = (to) => location.pathname === to.split('?')[0]

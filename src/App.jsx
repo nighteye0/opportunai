@@ -16,6 +16,7 @@ import ResumePage from './pages/ResumePage'
 import PostJobPage from './pages/PostJobPage'
 import AdminPage from './pages/AdminPage'
 import ToolsPage from './pages/ToolsPage'
+import ProductsPage from './pages/ProductsPage'
 import SubmitToolPage from './pages/SubmitToolPage'
 import { usePageView } from './hooks/usePageView'
 
@@ -68,6 +69,7 @@ function AppInner() {
         } />
         <Route path="/resume" element={<ResumePage />} />
         <Route path="/post" element={<PostPage onOpen={() => setShowSubmit(true)} />} />
+        <Route path="/products" element={<ProductsPage />} />
         <Route path="/tools" element={<ToolsPage />} />
         <Route path="/submit-tool" element={<SubmitToolPage />} />
         <Route path="/admin" element={<AdminPage />} />
