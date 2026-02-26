@@ -1,0 +1,245 @@
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import JobCard from '../components/JobCard'
+import JobDetailModal from '../components/JobDetailModal'
+
+
+const TYPE_FILTERS = ['All', 'Full-time', 'Part-time', 'Freelance', 'Contract', 'Remote', 'Internship']
+
+export default function JobsPage({ jobs, loading, errors, fetchRemotive, fetchAdzuna, fetchJSearch, apiKeys, onOpenAPI, onOpenSubmit, onOpenMatcher, matchedIds, setMatchedIds }) {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [tab, setTab] = useState(searchParams.get('tab') || 'all')
+  const [search, setSearch] = useState(searchParams.get('q') || '')
+  const [typeFilter, setTypeFilter] = useState('All')
+  const [detailJob, setDetailJob] = useState(null)
+  const [votes, setVotes] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('opportunai_votes') || '{}') } catch { return {} }
+  })
+
+  const vote = (id, e) => {
+    e.stopPropagation()
+    setVotes(prev => {
+      const next = { ...prev, [id]: (prev[id] || 0) + 1 }
+      localStorage.setItem('opportunai_votes', JSON.stringify(next))
+      return next
+    })
+  }
+
+  const { allJobs, remotive, adzuna, jsearch, submitted } = jobs
+
+  useEffect(() => {
+    const q = searchParams.get('q')
+    if (q) setSearch(q)
+  }, [searchParams])
+
+  const tabMap = {
+    all: allJobs,
+    remote: remotive,
+    adzuna: adzuna,
+    jsearch: jsearch,
+
+    saas: [...DEMO_SAAS, ...submitted.filter(j => j.source === 'saas')],
+    community: submitted,
+  }
+
+  const sortByMatch = list => {
+    if (!matchedIds.length) return list
+    return [...list.filter(j => matchedIds.includes(j.id)), ...list.filter(j => !matchedIds.includes(j.id))]
+  }
+
+  const tabJobs = tabMap[tab] || allJobs
+  const filtered = sortByMatch(tabJobs.filter(j =>
+    (typeFilter === 'All' || j.type === typeFilter) &&
+    (j.title?.toLowerCase().includes(search.toLowerCase()) ||
+     j.company?.toLowerCase().includes(search.toLowerCase()) ||
+     (j.tags || []).some(t => t?.toLowerCase().includes(search.toLowerCase())))
+  ))
+
+  const tabs = [
+    { k: 'all', l: 'All', n: allJobs.length },
+    { k: 'remote', l: '🌐 Remote', n: remotive.length },
+    { k: 'adzuna', l: '🔍 Adzuna', n: adzuna.length },
+    { k: 'jsearch', l: '⚡ JSearch', n: jsearch.length },
+
+    { k: 'saas', l: '🚀 SaaS', n: DEMO_SAAS.length },
+    { k: 'community', l: '📌 Community', n: submitted.length },
+  ]
+
+  return (
+    <div style={{ paddingTop: '72px', minHeight: '100vh' }}>
+      {/* Page header */}
+      <div style={{
+        background: 'var(--d2)', borderBottom: '1px solid var(--border)',
+        padding: '2.5rem 3rem 0',
+      }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.6rem' }}>
+            <div>
+              <span style={{ display: 'block', fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: '0.5rem', fontWeight: 700 }}>✦ Live Job Board</span>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem, 3vw, 2.4rem)', fontWeight: 800 }}>
+                All <span className="gold-text">Opportunities</span>
+              </h1>
+            </div>
+            <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+              <button className="btn btn-ai" onClick={onOpenMatcher}>🎯 AI Match Me</button>
+              <button className="btn btn-primary" onClick={onOpenSubmit}>📌 Post a Job</button>
+            </div>
+          </div>
+
+          {/* Source status row */}
+          <div style={{ display: 'flex', gap: '0.7rem', flexWrap: 'wrap', marginBottom: '1.2rem' }}>
+            {[
+              { key: 'remotive', label: '🌐 Remotive', count: remotive.length, onRefresh: () => fetchRemotive(search) },
+              { key: 'adzuna', label: '🔍 Adzuna', count: adzuna.length, hasKey: !!apiKeys?.adzunaId, onRefresh: () => apiKeys?.adzunaId ? fetchAdzuna(search || 'developer') : onOpenAPI() },
+              { key: 'jsearch', label: '⚡ JSearch', count: jsearch.length, hasKey: !!apiKeys?.rapidKey, onRefresh: () => apiKeys?.rapidKey ? fetchJSearch(search || 'developer') : onOpenAPI() },
+            ].map(src => (
+              <div key={src.key} style={{
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                padding: '0.4rem 0.9rem', borderRadius: '10px',
+                border: '1px solid var(--border)', background: 'var(--d3)',
+                fontSize: '0.76rem', fontWeight: 600,
+              }}>
+                <div style={{
+                  width: '7px', height: '7px', borderRadius: '50%', flexShrink: 0,
+                  background: loading[src.key] ? 'var(--gold)' : errors[src.key] ? 'var(--red)' : src.count > 0 ? 'var(--green)' : 'var(--dim)',
+                  animation: loading[src.key] ? 'blink 1s infinite' : src.count > 0 ? 'pulse 2s infinite' : 'none',
+                  boxShadow: src.count > 0 && !loading[src.key] ? '0 0 6px var(--green)' : 'none',
+                }} />
+                {src.label} ({src.count})
+                <button onClick={src.onRefresh} style={{
+                  background: 'none', border: 'none', color: 'var(--gold)', fontSize: '0.7rem',
+                  fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-body)', padding: 0,
+                }}>{src.hasKey === false ? '+ Key' : '↺'}</button>
+              </div>
+            ))}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.9rem',
+              borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--d3)',
+              fontSize: '0.76rem', fontWeight: 600,
+            }}>
+              <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: 'var(--green)', boxShadow: '0 0 6px var(--green)' }} />
+              📌 Community ({submitted.length})
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+            {tabs.map(t => (
+              <button key={t.k} onClick={() => setTab(t.k)} style={{
+                padding: '0.5rem 1.1rem', borderRadius: '12px 12px 0 0',
+                fontSize: '0.76rem', fontWeight: 700, border: 'none',
+                borderBottom: tab === t.k ? '2px solid var(--gold)' : '2px solid transparent',
+                background: tab === t.k ? 'var(--gd)' : 'transparent',
+                color: tab === t.k ? 'var(--gold)' : 'var(--dim)',
+                cursor: 'pointer', transition: 'all 0.18s', fontFamily: 'var(--font-body)',
+                textTransform: 'uppercase', letterSpacing: '0.04em',
+              }}>
+                {t.l}
+                <span style={{
+                  fontSize: '0.65rem', background: 'var(--d5)',
+                  padding: '0.1rem 0.4rem', borderRadius: '50px', marginLeft: '0.3rem',
+                }}>{t.n}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div style={{ padding: '2rem 3rem', maxWidth: '1400px', margin: '0 auto' }}>
+        {/* Search + filters */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.6rem' }}>
+          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', flex: 1, minWidth: '240px' }}>
+            {/* Search input */}
+            <div style={{
+              display: 'flex', flex: 1, maxWidth: '380px',
+              background: 'var(--d3)', border: '1px solid var(--border)',
+              borderRadius: '10px', overflow: 'hidden',
+            }}>
+              <input
+                value={search} onChange={e => setSearch(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && fetchRemotive(search)}
+                placeholder="Search jobs, skills, companies..."
+                style={{
+                  flex: 1, background: 'none', border: 'none', outline: 'none',
+                  padding: '0.65rem 1rem', color: 'var(--text)',
+                  fontSize: '0.86rem', fontFamily: 'var(--font-body)',
+                }}
+              />
+              <button onClick={() => { fetchRemotive(search); fetchAdzuna(search || 'developer') }} style={{
+                background: 'var(--gd)', border: 'none', padding: '0 1rem',
+                color: 'var(--gold)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700,
+                fontFamily: 'var(--font-body)',
+              }}>↵</button>
+            </div>
+          </div>
+
+          {/* Type filter chips */}
+          <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+            {TYPE_FILTERS.map(t => (
+              <button key={t} onClick={() => setTypeFilter(t)} style={{
+                padding: '0.32rem 0.85rem', borderRadius: '50px', fontSize: '0.74rem',
+                fontWeight: 600, border: `1px solid ${typeFilter === t ? 'rgba(232,184,75,0.35)' : 'var(--border)'}`,
+                background: typeFilter === t ? 'var(--gd)' : 'transparent',
+                color: typeFilter === t ? 'var(--text)' : 'var(--dim)',
+                cursor: 'pointer', transition: 'all 0.18s', fontFamily: 'var(--font-body)',
+              }}>{t}</button>
+            ))}
+          </div>
+
+          <span style={{ fontSize: '0.78rem', color: 'var(--dim)', fontWeight: 600, flexShrink: 0 }}>
+            {filtered.length} results
+          </span>
+        </div>
+
+        {/* Error messages */}
+        {Object.entries(errors).map(([k, v]) => v && (
+          <div key={k} style={{ color: 'var(--red)', fontSize: '0.78rem', marginBottom: '0.5rem' }}>⚠️ {v}</div>
+        ))}
+
+        {/* AI Match banner */}
+        {matchedIds.length > 0 && (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
+            padding: '0.9rem 1.2rem', marginBottom: '1.5rem',
+            background: 'linear-gradient(135deg, rgba(167,139,250,0.1), rgba(232,184,75,0.06))',
+            border: '1px solid rgba(167,139,250,0.25)', borderRadius: '14px', flexWrap: 'wrap',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', fontSize: '0.84rem', fontWeight: 600 }}>
+              <span>🎯</span>
+              <span>Showing <strong style={{ color: 'var(--purple)' }}>{matchedIds.length} AI-matched jobs</strong> at the top</span>
+            </div>
+            <button onClick={() => setMatchedIds([])} style={{
+              background: 'none', border: '1px solid rgba(167,139,250,0.25)', color: 'var(--dim)',
+              padding: '0.28rem 0.8rem', borderRadius: '50px', cursor: 'pointer',
+              fontSize: '0.72rem', fontWeight: 600, fontFamily: 'var(--font-body)', transition: 'all 0.2s',
+            }}>✕ Clear</button>
+          </div>
+        )}
+
+        {/* Jobs grid */}
+        {loading.remotive && tab === 'remote' || loading.adzuna && tab === 'adzuna' || loading.jsearch && tab === 'jsearch' ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.2rem' }}>
+            {[1,2,3,4,5,6].map(i => <div key={i} className="skeleton" style={{ height: '210px' }} />)}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="empty-state">
+            <div className="icon">{tab === 'community' ? '📌' : '🔍'}</div>
+            <h3>{tab === 'community' ? 'No community jobs yet' : 'No jobs found'}</h3>
+            <p>{tab === 'community' ? 'Be the first to post a job!' : tab === 'adzuna' || tab === 'jsearch' ? 'Add your API key to see real jobs here.' : 'Try a different search or filter.'}</p>
+            {(tab === 'adzuna' || tab === 'jsearch') && <button className="btn btn-primary" style={{ marginTop: '1.2rem' }} onClick={onOpenAPI}>🔑 Add API Key</button>}
+            {tab === 'community' && <button className="btn btn-primary" style={{ marginTop: '1.2rem' }} onClick={onOpenSubmit}>📌 Post First Job</button>}
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.2rem' }}>
+            {filtered.map(j => (
+              <JobCard key={j.id} job={j} onOpenDetail={setDetailJob} isHighlighted={matchedIds.includes(j.id)} votes={votes} onVote={vote} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {detailJob && <JobDetailModal job={detailJob} onClose={() => setDetailJob(null)} />}
+    </div>
+  )
+}
