@@ -1,371 +1,242 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
-import LiveFeed from '../components/LiveFeed'
-import NewsletterSignup from '../components/NewsletterSignup'
 
 const STATS = [
-  { value: '2.4M+', label: 'Active Jobs', icon: '💼' },
-  { value: '850K+', label: 'Companies', icon: '🏢' },
-  { value: '12M+', label: 'Professionals', icon: '👥' },
-  { value: '94%', label: 'Placement Rate', icon: '🎯' },
+  { value: '65+', label: 'Live Jobs' },
+  { value: '50+', label: 'SaaS Tools' },
+  { value: '3', label: 'Job Sources' },
+  { value: '100%', label: 'Remote' },
 ]
 
-const FEATURES = [
-  { icon: '🧠', title: 'AI Resume Builder', desc: 'Generate a tailored, ATS-optimized resume in seconds.', color: '#A87CFA', tag: 'Powered by Claude' },
-  { icon: '🎯', title: 'AI Job Matching', desc: 'Describe your background — AI finds your best-fit roles instantly.', color: '#F0C040', tag: 'Smart Match' },
-  { icon: '🌐', title: 'Remotive API', desc: 'Live remote jobs in real-time — no API key required.', color: '#3DDA78', tag: 'No key needed' },
-  { icon: '🔍', title: 'Adzuna API', desc: 'Millions of real jobs from 100+ countries, updated hourly.', color: '#5BA4FA', tag: '100+ countries' },
-  { icon: '⚡', title: 'JSearch API', desc: 'Jobs from LinkedIn, Indeed, and Glassdoor in one feed.', color: '#FA8C3C', tag: 'Aggregated' },
-  { icon: '📌', title: 'Community Board', desc: 'Post a job free forever. Reach thousands instantly.', color: '#FA6060', tag: 'Free forever' },
-]
+const TAGS = ['React', 'Python', 'AI/ML', 'Design', 'Marketing', 'DevOps', 'Node.js', 'TypeScript']
 
-const MARQUEE_COMPANIES = ['Stripe', 'Notion', 'Vercel', 'Linear', 'Figma', 'Loom', 'Framer', 'Supabase', 'Railway', 'Planetscale', 'Resend', 'Clerk', 'Neon', 'Turso', 'Upstash']
-
-function useInView(ref) {
-  const [inView, setInView] = useState(false)
-  useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setInView(true) }, { threshold: 0.15 })
-    if (ref.current) obs.observe(ref.current)
-    return () => obs.disconnect()
-  }, [])
-  return inView
-}
-
-function AnimatedSection({ children, delay = 0 }) {
-  const ref = useRef()
-  const inView = useInView(ref)
-  return (
-    <div ref={ref} style={{
-      opacity: inView ? 1 : 0,
-      transform: inView ? 'translateY(0)' : 'translateY(40px)',
-      transition: `opacity 0.8s ${delay}s cubic-bezier(0.4,0,0.2,1), transform 0.8s ${delay}s cubic-bezier(0.4,0,0.2,1)`,
-    }}>{children}</div>
-  )
-}
-
-export default function HomePage({ onOpenMatcher, onOpenSubmit, allJobs = [] }) {
-  const navigate = useNavigate()
+export default function HomePage() {
+  const [jobs, setJobs] = useState([])
+  const [tools, setTools] = useState([])
   const [search, setSearch] = useState('')
-  const [hoveredFeature, setHoveredFeature] = useState(null)
+  const [loaded, setLoaded] = useState(false)
+  const heroRef = useRef(null)
 
-  const handleSearch = () => {
-    if (search.trim()) navigate(`/jobs?q=${encodeURIComponent(search)}`)
-    else navigate('/jobs')
+  useEffect(() => {
+    setTimeout(() => setLoaded(true), 100)
+    fetch('/api/jobs').then(r => r.json()).then(d => setJobs((d.jobs || []).slice(0, 6))).catch(() => {})
+    fetch('/api/tools').then(r => r.json()).then(d => setTools((d.tools || []).filter(t => t.featured).slice(0, 4))).catch(() => {})
+  }, [])
+
+  const handleSearch = (e) => {
+    e.preventDefault()
+    window.location.href = `/jobs${search ? `?q=${encodeURIComponent(search)}` : ''}`
   }
 
   return (
-    <div style={{ paddingTop: '64px', background: 'var(--dark)' }}>
+    <div style={{ background: '#080808', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif", overflowX: 'hidden' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .fade-up { opacity: 0; transform: translateY(32px); transition: opacity 0.7s ease, transform 0.7s ease; }
+        .fade-up.visible { opacity: 1; transform: translateY(0); }
+        .d1 { transition-delay: 0.05s; }
+        .d2 { transition-delay: 0.15s; }
+        .d3 { transition-delay: 0.25s; }
+        .d4 { transition-delay: 0.35s; }
+        .d5 { transition-delay: 0.45s; }
+        .job-card:hover { border-color: #c9a84c !important; transform: translateY(-3px); }
+        .tool-card:hover { border-color: #c9a84c !important; background: #1a1a1a !important; }
+        .tag-pill:hover { background: rgba(201,168,76,0.2) !important; color: #c9a84c !important; border-color: rgba(201,168,76,0.4) !important; }
+        .search-wrap:focus-within { border-color: #c9a84c !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.15) !important; }
+        .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(201,168,76,0.35) !important; }
+        .ghost-btn:hover { border-color: #c9a84c !important; color: #c9a84c !important; }
+        .glow { position: absolute; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
+        ::placeholder { color: #555; }
+        input:focus { outline: none; }
+      `}</style>
 
-      {/* ══════════════ HERO ══════════════ */}
-      <section style={{
-        minHeight: 'calc(100vh - 64px)',
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        padding: '6rem 2rem 5rem',
-        textAlign: 'center', position: 'relative', overflow: 'hidden',
-      }}>
-        {/* Mesh gradient background */}
-        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-          <div style={{
-            position: 'absolute', width: '900px', height: '900px',
-            top: '-400px', left: '50%', transform: 'translateX(-50%)',
-            background: 'radial-gradient(circle, rgba(240,192,64,0.07) 0%, transparent 60%)',
-            animation: 'pulse 8s ease-in-out infinite',
-          }} />
-          <div style={{
-            position: 'absolute', width: '600px', height: '600px',
-            bottom: '-200px', left: '-150px',
-            background: 'radial-gradient(circle, rgba(168,124,250,0.05) 0%, transparent 65%)',
-            animation: 'pulse 11s 3s ease-in-out infinite',
-          }} />
-          <div style={{
-            position: 'absolute', width: '500px', height: '500px',
-            top: '10%', right: '-100px',
-            background: 'radial-gradient(circle, rgba(61,218,120,0.03) 0%, transparent 65%)',
-            animation: 'pulse 13s 1s ease-in-out infinite',
-          }} />
-          {/* Grid */}
-          <div style={{
-            position: 'absolute', inset: 0,
-            backgroundImage: 'linear-gradient(rgba(240,192,64,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(240,192,64,0.025) 1px, transparent 1px)',
-            backgroundSize: '72px 72px',
-            maskImage: 'radial-gradient(ellipse at 50% 30%, black 10%, transparent 70%)',
-          }} />
-        </div>
+      {/* HERO */}
+      <section ref={heroRef} style={{ position: 'relative', minHeight: '88vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 24px 60px', textAlign: 'center', overflow: 'hidden' }}>
+        {/* Background glows */}
+        <div className="glow" style={{ width: 600, height: 600, background: 'rgba(201,168,76,0.07)', top: '10%', left: '50%', transform: 'translateX(-50%)' }} />
+        <div className="glow" style={{ width: 300, height: 300, background: 'rgba(201,168,76,0.05)', top: '30%', left: '10%' }} />
+        <div className="glow" style={{ width: 300, height: 300, background: 'rgba(201,168,76,0.05)', top: '20%', right: '10%' }} />
 
-        {/* Badge */}
-        <div className="badge badge-gold animate-up" style={{ marginBottom: '2rem', animationDelay: '0s' }}>
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--green)', display: 'inline-block', animation: 'blink 1.5s infinite' }} />
-          Live · AI-Powered Job Platform
-        </div>
+        {/* Grid texture */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '60px 60px', zIndex: 0 }} />
 
-        {/* Headline */}
-        <h1 style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(3.2rem, 9vw, 7.5rem)',
-          fontWeight: 800, lineHeight: 0.88, letterSpacing: '-0.03em',
-          maxWidth: '960px', marginBottom: '0',
-          animation: 'fadeUp 0.8s 0.1s cubic-bezier(0.4,0,0.2,1) both',
-        }}>
-          Every Job.<br />
-          <span style={{
-            background: 'linear-gradient(135deg, #F0C040 0%, #FFE17A 40%, #A87CFA 100%)',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-          }}>One Platform.</span>
-        </h1>
-
-        {/* Subtitle */}
-        <p style={{
-          fontSize: 'clamp(0.95rem, 2vw, 1.1rem)', color: 'var(--dim)',
-          maxWidth: '500px', margin: '2.2rem auto 0', lineHeight: 1.8,
-          animation: 'fadeUp 0.8s 0.22s cubic-bezier(0.4,0,0.2,1) both',
-        }}>
-          Full-time, freelance, SaaS, remote — all in one place. Powered by live APIs, Claude AI, and a free community board.
-        </p>
-
-        {/* CTA Buttons */}
-        <div style={{
-          display: 'flex', gap: '0.7rem', flexWrap: 'wrap', justifyContent: 'center',
-          margin: '2.5rem 0',
-          animation: 'fadeUp 0.8s 0.35s cubic-bezier(0.4,0,0.2,1) both',
-        }}>
-          <button className="btn btn-primary-lg" onClick={() => navigate('/jobs')}>
-            Browse Live Jobs →
-          </button>
-          <button className="btn btn-ai" style={{ padding: '0.9rem 2rem', fontSize: '0.92rem' }} onClick={onOpenMatcher}>
-            🎯 Find My Match
-          </button>
-          <button className="btn btn-ghost" style={{ padding: '0.9rem 1.8rem' }} onClick={onOpenSubmit}>
-            + Post Free
-          </button>
-        </div>
-
-        {/* Search bar */}
-        <div style={{
-          width: '100%', maxWidth: '580px',
-          display: 'flex',
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(240,192,64,0.15)',
-          borderRadius: '100px', overflow: 'hidden',
-          animation: 'fadeUp 0.8s 0.48s cubic-bezier(0.4,0,0.2,1) both',
-          boxShadow: '0 0 80px rgba(240,192,64,0.06), 0 0 0 1px rgba(255,255,255,0.03) inset',
-          backdropFilter: 'blur(12px)',
-        }}>
-          <span style={{ padding: '0 0 0 1.4rem', display: 'flex', alignItems: 'center', color: 'var(--dim)', fontSize: '1rem' }}>🔍</span>
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleSearch()}
-            placeholder="Search jobs, skills, companies..."
-            style={{
-              flex: 1, background: 'none', border: 'none', outline: 'none',
-              padding: '1rem 1rem', color: 'var(--text)',
-              fontSize: '0.92rem', fontFamily: 'var(--font-body)',
-            }}
-          />
-          <button onClick={handleSearch} style={{
-            background: 'var(--grad)', border: 'none',
-            padding: '0.75rem 1.8rem', fontWeight: 800, color: '#000',
-            cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '0.84rem',
-            borderRadius: '100px', margin: '0.3rem',
-            transition: 'all 0.25s ease',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(240,192,64,0.4)' }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none' }}
-          >Search</button>
-        </div>
-
-        {/* Stats row */}
-        <div style={{
-          display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '0',
-          maxWidth: '720px', margin: '3.5rem auto 0',
-          background: 'rgba(255,255,255,0.02)',
-          border: '1px solid rgba(255,255,255,0.06)',
-          borderRadius: '24px', overflow: 'hidden',
-          animation: 'fadeUp 0.8s 0.6s cubic-bezier(0.4,0,0.2,1) both',
-          backdropFilter: 'blur(8px)',
-        }}>
-          {STATS.map((s, i) => (
-            <div key={s.label} style={{
-              flex: 1, minWidth: '130px', padding: '1.4rem 1.2rem', textAlign: 'center',
-              borderRight: i < STATS.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-              transition: 'background 0.2s',
-            }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(240,192,64,0.03)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-            >
-              <div style={{ fontSize: '1.2rem', marginBottom: '0.3rem' }}>{s.icon}</div>
-              <div style={{
-                fontFamily: 'var(--font-display)', fontSize: '1.7rem', fontWeight: 800,
-                background: 'var(--grad)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-              }}>{s.value}</div>
-              <div style={{ fontSize: '0.67rem', color: 'var(--dim)', marginTop: '0.2rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ══════════════ MARQUEE ══════════════ */}
-      <div style={{
-        borderTop: '1px solid rgba(255,255,255,0.04)',
-        borderBottom: '1px solid rgba(255,255,255,0.04)',
-        padding: '1.2rem 0', overflow: 'hidden', position: 'relative',
-        background: 'rgba(255,255,255,0.01)',
-      }}>
-        <div style={{ display: 'flex', gap: '3rem', animation: 'marquee 25s linear infinite', width: 'max-content' }}>
-          {[...MARQUEE_COMPANIES, ...MARQUEE_COMPANIES].map((c, i) => (
-            <span key={i} style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--dim)', letterSpacing: '0.05em', whiteSpace: 'nowrap', userSelect: 'none' }}>{c}</span>
-          ))}
-        </div>
-        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '120px', background: 'linear-gradient(90deg, var(--dark), transparent)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '120px', background: 'linear-gradient(-90deg, var(--dark), transparent)', pointerEvents: 'none' }} />
-        <style>{`@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
-      </div>
-
-      {/* ══════════════ FEATURES ══════════════ */}
-      <section style={{ padding: '7rem 3rem', maxWidth: '1300px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-        <AnimatedSection>
-          <div style={{ marginBottom: '4rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1.5rem' }}>
-            <div>
-              <span className="section-label">✦ Everything You Need</span>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.2rem, 4vw, 3.2rem)', fontWeight: 800, lineHeight: 1, letterSpacing: '-0.02em' }}>
-                Built for <span className="gold-text">Everyone</span>
-              </h2>
-            </div>
-            <p style={{ color: 'var(--dim)', maxWidth: '360px', lineHeight: 1.75, fontSize: '0.92rem' }}>
-              Job seekers, freelancers, SaaS founders, employers — one platform to rule them all.
-            </p>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 860 }}>
+          <div className={`fade-up d1 ${loaded ? 'visible' : ''}`}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)', borderRadius: 100, padding: '6px 16px', fontSize: 13, color: '#c9a84c', fontWeight: 600, marginBottom: 28 }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#c9a84c', display: 'inline-block', animation: 'pulse 2s infinite' }} />
+              65+ remote jobs updated daily
+            </span>
           </div>
-        </AnimatedSection>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1px', background: 'rgba(255,255,255,0.04)', borderRadius: '24px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.04)' }}>
-          {FEATURES.map((f, i) => (
-            <div key={f.title}
-              onMouseEnter={() => setHoveredFeature(i)}
-              onMouseLeave={() => setHoveredFeature(null)}
-              style={{
-                background: hoveredFeature === i ? `linear-gradient(160deg, ${f.color}0D, var(--d3))` : 'var(--d2)',
-                padding: '2.2rem', cursor: 'default', position: 'relative', overflow: 'hidden',
-                transition: 'background 0.35s ease',
-              }}>
-              {/* Top border accent */}
-              <div style={{
-                position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
-                background: `linear-gradient(90deg, transparent, ${f.color}${hoveredFeature === i ? '80' : '20'}, transparent)`,
-                transition: 'opacity 0.35s',
-              }} />
+          <h1 className={`fade-up d2 ${loaded ? 'visible' : ''}`} style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(42px, 7vw, 88px)', fontWeight: 800, lineHeight: 1.05, color: '#fff', letterSpacing: '-2px', marginBottom: 24 }}>
+            Find Your Next<br />
+            <span style={{ background: 'linear-gradient(135deg, #c9a84c 0%, #f0d878 50%, #c9a84c 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Remote Job</span>
+          </h1>
 
-              <div style={{
-                width: '48px', height: '48px', borderRadius: '14px',
-                background: `${f.color}15`,
-                border: `1px solid ${f.color}25`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '1.5rem', marginBottom: '1.2rem',
-                transition: 'transform 0.35s cubic-bezier(0.34,1.4,0.64,1)',
-                transform: hoveredFeature === i ? 'scale(1.12) rotate(-4deg)' : 'scale(1) rotate(0deg)',
-              }}>{f.icon}</div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
-                <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text)' }}>{f.title}</div>
-                <span style={{
-                  fontSize: '0.6rem', padding: '0.15rem 0.5rem', borderRadius: '50px',
-                  background: `${f.color}18`, color: f.color, fontWeight: 700,
-                  border: `1px solid ${f.color}25`, letterSpacing: '0.04em',
-                }}>{f.tag}</span>
-              </div>
-              <div style={{ color: 'var(--dim)', fontSize: '0.85rem', lineHeight: 1.7 }}>{f.desc}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ══════════════ LIVE FEED ══════════════ */}
-      <LiveFeed allJobs={allJobs} onOpenSubmit={onOpenSubmit} />
-
-      {/* ══════════════ NEWSLETTER ══════════════ */}
-      <NewsletterSignup />
-
-      {/* ══════════════ CTA ══════════════ */}
-      <section style={{
-        textAlign: 'center', padding: '8rem 3rem',
-        position: 'relative', overflow: 'hidden',
-        borderTop: '1px solid rgba(255,255,255,0.04)',
-      }}>
-        <div style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'radial-gradient(ellipse at 50% 100%, rgba(240,192,64,0.06) 0%, transparent 60%)',
-        }} />
-        <AnimatedSection>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-            background: 'rgba(61,218,120,0.08)', border: '1px solid rgba(61,218,120,0.2)',
-            borderRadius: '50px', padding: '0.35rem 1rem', marginBottom: '2rem',
-            fontSize: '0.72rem', fontWeight: 700, color: 'var(--green)', letterSpacing: '0.1em',
-          }}>
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--green)', display: 'inline-block', animation: 'blink 1.5s infinite' }} />
-            42+ jobs available right now
-          </div>
-          <h2 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(2.4rem, 6vw, 4.2rem)', fontWeight: 800,
-            maxWidth: '700px', margin: '0 auto 1.5rem', lineHeight: 0.95, letterSpacing: '-0.02em',
-          }}>
-            Your next opportunity<br /><span className="gold-text">is waiting.</span>
-          </h2>
-          <p style={{ color: 'var(--dim)', fontSize: '1rem', maxWidth: '420px', margin: '0 auto 3rem', lineHeight: 1.75 }}>
-            Join millions of professionals, freelancers, and founders building their future on OpportuAI.
+          <p className={`fade-up d3 ${loaded ? 'visible' : ''}`} style={{ fontSize: 18, color: '#888', lineHeight: 1.7, marginBottom: 40, maxWidth: 520, margin: '0 auto 40px' }}>
+            Curated remote opportunities from top companies worldwide — powered by AI, built for builders.
           </p>
-          <div style={{ display: 'flex', gap: '0.8rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button className="btn btn-primary-lg" onClick={() => navigate('/jobs')}>Browse All Jobs</button>
-            <button className="btn btn-ai" style={{ padding: '0.9rem 2.2rem' }} onClick={onOpenMatcher}>🎯 AI Match Me</button>
-            <button className="btn btn-ghost" style={{ padding: '0.9rem 2rem' }} onClick={onOpenSubmit}>+ Post a Job</button>
-          </div>
-        </AnimatedSection>
-      </section>
 
-      {/* ══════════════ FOOTER ══════════════ */}
-      <footer style={{
-        borderTop: '1px solid rgba(255,255,255,0.05)',
-        background: 'rgba(255,255,255,0.01)',
-      }}>
-        <div style={{
-          maxWidth: '1300px', margin: '0 auto',
-          padding: '3rem 3rem 2.5rem',
-          display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '2rem',
-        }}>
-          <div>
-            <div style={{
-              fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 800,
-              background: 'var(--grad)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-              marginBottom: '0.5rem',
-            }}>OpportuAI</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--dim)', lineHeight: 1.6 }}>
-              The AI-powered job platform<br />built for everyone.
+          {/* Search bar */}
+          <form className={`fade-up d4 ${loaded ? 'visible' : ''}`} onSubmit={handleSearch} style={{ marginBottom: 28 }}>
+            <div className="search-wrap" style={{ display: 'flex', alignItems: 'center', background: '#111', border: '1.5px solid #2a2a2a', borderRadius: 16, padding: '6px 6px 6px 20px', maxWidth: 580, margin: '0 auto', transition: 'border-color 0.2s, box-shadow 0.2s' }}>
+              <span style={{ fontSize: 18, marginRight: 12 }}>🔍</span>
+              <input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search by role, skill, or company..."
+                style={{ flex: 1, background: 'transparent', border: 'none', color: '#fff', fontSize: 15, padding: '8px 0' }}
+              />
+              <button type="submit" className="cta-btn" style={{ background: 'linear-gradient(135deg, #c9a84c, #e8c96a)', color: '#0d0d0d', fontWeight: 700, fontSize: 14, border: 'none', borderRadius: 12, padding: '12px 24px', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'transform 0.2s, box-shadow 0.2s' }}>
+                Search Jobs
+              </button>
             </div>
-          </div>
+          </form>
 
-          <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-            {['About', 'Blog', 'Privacy', 'Terms', 'Contact'].map(l => (
-              <a key={l} style={{
-                fontSize: '0.78rem', color: 'var(--dim)', cursor: 'pointer',
-                fontWeight: 500, transition: 'color 0.2s',
-              }}
-                onMouseEnter={e => e.target.style.color = 'var(--text)'}
-                onMouseLeave={e => e.target.style.color = 'var(--dim)'}
-              >{l}</a>
+          {/* Tag pills */}
+          <div className={`fade-up d5 ${loaded ? 'visible' : ''}`} style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+            {TAGS.map(tag => (
+              <a key={tag} href={`/jobs?q=${tag}`} className="tag-pill" style={{ padding: '6px 14px', borderRadius: 100, fontSize: 13, border: '1px solid #2a2a2a', color: '#777', background: 'transparent', textDecoration: 'none', transition: 'all 0.2s' }}>
+                {tag}
+              </a>
             ))}
           </div>
+        </div>
+      </section>
 
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '0.72rem', color: 'var(--dim2)' }}>© 2026 OpportuAI</div>
-            <div style={{ fontSize: '0.68rem', color: 'var(--dim2)', marginTop: '0.2rem' }}>Built for Everyone · Powered by Claude AI</div>
+      {/* STATS BAR */}
+      <section style={{ borderTop: '1px solid #1a1a1a', borderBottom: '1px solid #1a1a1a', background: '#0d0d0d', padding: '28px 24px' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, textAlign: 'center' }}>
+          {STATS.map((s, i) => (
+            <div key={i}>
+              <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 36, fontWeight: 800, color: '#c9a84c', lineHeight: 1 }}>{s.value}</div>
+              <div style={{ fontSize: 13, color: '#666', marginTop: 4, fontWeight: 500 }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FEATURED JOBS */}
+      <section style={{ padding: '80px 24px', maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 40, flexWrap: 'wrap', gap: 16 }}>
+          <div>
+            <div style={{ fontSize: 12, color: '#c9a84c', fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 10 }}>Now Hiring</div>
+            <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 800, color: '#fff', letterSpacing: '-1px' }}>Featured Remote Jobs</h2>
+          </div>
+          <a href="/jobs" className="ghost-btn" style={{ border: '1.5px solid #333', color: '#aaa', borderRadius: 10, padding: '10px 20px', fontSize: 14, fontWeight: 600, textDecoration: 'none', transition: 'all 0.2s' }}>
+            View all jobs →
+          </a>
+        </div>
+
+        {jobs.length === 0 ? (
+          <div style={{ textAlign: 'center', color: '#555', padding: 60 }}>Loading jobs...</div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
+            {jobs.map(job => (
+              <a key={job.id} href="/jobs" className="job-card" style={{ background: '#0f0f0f', border: '1px solid #1e1e1e', borderRadius: 16, padding: 22, display: 'flex', flexDirection: 'column', gap: 14, textDecoration: 'none', transition: 'border-color 0.2s, transform 0.2s' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 10, background: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>{job.logo || '🏢'}</div>
+                  <div>
+                    <div style={{ color: '#fff', fontWeight: 600, fontSize: 15, lineHeight: 1.3 }}>{job.title}</div>
+                    <div style={{ color: '#666', fontSize: 13 }}>{job.company}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{ background: '#161616', border: '1px solid #252525', color: '#888', borderRadius: 6, padding: '3px 10px', fontSize: 12 }}>📍 {job.location}</span>
+                  <span style={{ background: '#161616', border: '1px solid #252525', color: '#888', borderRadius: 6, padding: '3px 10px', fontSize: 12 }}>💼 {job.type}</span>
+                  {job.salary && <span style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.2)', color: '#c9a84c', borderRadius: 6, padding: '3px 10px', fontSize: 12 }}>💰 {job.salary}</span>}
+                </div>
+                {job.tags && job.tags.length > 0 && (
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    {job.tags.slice(0, 3).map(tag => (
+                      <span key={tag} style={{ background: '#141414', color: '#666', borderRadius: 4, padding: '2px 8px', fontSize: 11 }}>{tag}</span>
+                    ))}
+                  </div>
+                )}
+              </a>
+            ))}
+          </div>
+        )}
+
+        <div style={{ textAlign: 'center', marginTop: 40 }}>
+          <a href="/jobs" className="cta-btn" style={{ display: 'inline-block', background: 'linear-gradient(135deg, #c9a84c, #e8c96a)', color: '#0d0d0d', fontWeight: 700, fontSize: 16, borderRadius: 12, padding: '14px 36px', textDecoration: 'none', transition: 'transform 0.2s, box-shadow 0.2s' }}>
+            Browse All Jobs →
+          </a>
+        </div>
+      </section>
+
+      {/* FEATURED TOOLS */}
+      <section style={{ background: '#0a0a0a', borderTop: '1px solid #141414', padding: '80px 24px' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 40, flexWrap: 'wrap', gap: 16 }}>
+            <div>
+              <div style={{ fontSize: 12, color: '#c9a84c', fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 10 }}>Directory</div>
+              <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 800, color: '#fff', letterSpacing: '-1px' }}>Top SaaS Tools</h2>
+            </div>
+            <a href="/tools" className="ghost-btn" style={{ border: '1.5px solid #333', color: '#aaa', borderRadius: 10, padding: '10px 20px', fontSize: 14, fontWeight: 600, textDecoration: 'none', transition: 'all 0.2s' }}>
+              View all tools →
+            </a>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
+            {tools.length > 0 ? tools.map(tool => (
+              <a key={tool.id} href={tool.website} target="_blank" rel="noopener noreferrer" className="tool-card" style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: 16, padding: 22, display: 'flex', flexDirection: 'column', gap: 12, textDecoration: 'none', transition: 'all 0.2s' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ fontSize: 32 }}>{tool.logo || '🔧'}</div>
+                  <div>
+                    <div style={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>{tool.name}</div>
+                    <div style={{ color: '#c9a84c', fontSize: 12, fontWeight: 600 }}>{tool.pricing}</div>
+                  </div>
+                </div>
+                <p style={{ color: '#666', fontSize: 13, lineHeight: 1.5 }}>{tool.description.slice(0, 80)}...</p>
+                <span style={{ color: '#c9a84c', fontSize: 13, fontWeight: 600 }}>Visit →</span>
+              </a>
+            )) : [
+              { id: 1, logo: '🤖', name: 'ChatGPT', pricing: 'Free / $20/mo', description: 'Conversational AI for writing, coding, and analysis.', website: 'https://chat.openai.com' },
+              { id: 2, logo: '📓', name: 'Notion', pricing: 'Free / $8/mo', description: 'All-in-one workspace for notes and project management.', website: 'https://notion.so' },
+              { id: 3, logo: '▲', name: 'Vercel', pricing: 'Free / $20/mo', description: 'Deploy frontend apps instantly with zero config.', website: 'https://vercel.com' },
+              { id: 4, logo: '🖌️', name: 'Figma', pricing: 'Free / $12/mo', description: 'Collaborative interface design tool for teams.', website: 'https://figma.com' },
+            ].map(tool => (
+              <a key={tool.id} href={tool.website} target="_blank" rel="noopener noreferrer" className="tool-card" style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: 16, padding: 22, display: 'flex', flexDirection: 'column', gap: 12, textDecoration: 'none', transition: 'all 0.2s' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ fontSize: 32 }}>{tool.logo}</div>
+                  <div>
+                    <div style={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>{tool.name}</div>
+                    <div style={{ color: '#c9a84c', fontSize: 12, fontWeight: 600 }}>{tool.pricing}</div>
+                  </div>
+                </div>
+                <p style={{ color: '#666', fontSize: 13, lineHeight: 1.5 }}>{tool.description}</p>
+                <span style={{ color: '#c9a84c', fontSize: 13, fontWeight: 600 }}>Visit →</span>
+              </a>
+            ))}
           </div>
         </div>
-        <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(240,192,64,0.15), transparent)' }} />
-        <div style={{ padding: '0.8rem', textAlign: 'center', fontSize: '0.65rem', color: 'var(--dim2)' }}>
-          Made with ♥ using React + Vite + Supabase
+      </section>
+
+      {/* FOR EMPLOYERS CTA */}
+      <section style={{ padding: '80px 24px' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto', background: 'linear-gradient(135deg, #111 0%, #161610 100%)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: 24, padding: '56px 48px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+          <div className="glow" style={{ width: 400, height: 400, background: 'rgba(201,168,76,0.06)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} />
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{ fontSize: 48, marginBottom: 20 }}>📢</div>
+            <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: 800, color: '#fff', letterSpacing: '-1px', marginBottom: 14 }}>Hiring remotely?</h2>
+            <p style={{ color: '#888', fontSize: 16, lineHeight: 1.7, marginBottom: 32, maxWidth: 440, margin: '0 auto 32px' }}>Post your job for free and reach thousands of remote-first candidates. No credit card required.</p>
+            <a href="/post-job" className="cta-btn" style={{ display: 'inline-block', background: 'linear-gradient(135deg, #c9a84c, #e8c96a)', color: '#0d0d0d', fontWeight: 700, fontSize: 16, borderRadius: 12, padding: '14px 36px', textDecoration: 'none', transition: 'transform 0.2s, box-shadow 0.2s' }}>
+              Post a Job for Free →
+            </a>
+          </div>
         </div>
-      </footer>
+      </section>
+
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
+        }
+        @media (max-width: 600px) {
+          section { padding-left: 16px !important; padding-right: 16px !important; }
+        }
+      `}</style>
     </div>
   )
 }
