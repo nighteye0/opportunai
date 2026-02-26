@@ -1,135 +1,98 @@
-async function fetchRemotive() {
-  try {
-    const r = await fetch('https://remotive.com/api/remote-jobs?limit=20')
-    const d = await r.json()
-    return (d.jobs || []).map(j => ({
-      id: `remotive_${j.id}`,
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET')
+
+  const COMMUNITY_JOBS = [
+    {
+      id: 'c1', title: 'Founding Engineer', company: 'Stealth AI Startup',
+      location: 'SF / Remote', type: 'Full-time', salary: '$160k + equity',
+      tags: ['Full-stack', 'AI', 'Startup'], source: 'community',
+      logo: '🚀', postedAt: new Date().toISOString(), upvotes: 0,
+    },
+    {
+      id: 'c2', title: 'Freelance Brand Designer', company: 'TechCo',
+      location: 'Remote', type: 'Freelance', salary: '$75–$110/hr',
+      tags: ['Branding', 'Figma', 'Illustration'], source: 'community',
+      logo: '🎨', postedAt: new Date().toISOString(), upvotes: 0,
+    },
+    {
+      id: 'c3', title: 'Head of Engineering', company: 'Resend',
+      location: 'Remote', type: 'Full-time', salary: '$200k–$260k',
+      tags: ['Engineering Leadership', 'Node.js'], source: 'community',
+      logo: '📧', postedAt: new Date().toISOString(), upvotes: 0,
+    },
+  ]
+
+  const fetches = await Promise.allSettled([
+    fetch('https://remotive.com/api/remote-jobs?limit=25').then(r => r.json()),
+    fetch('https://arbeitnow.com/api/job-board-api').then(r => r.json()),
+    fetch('https://remoteok.com/api').then(r => r.json()),
+  ])
+
+  let jobs = [...COMMUNITY_JOBS]
+
+  // Remotive
+  if (fetches[0].status === 'fulfilled') {
+    const data = fetches[0].value
+    const remotive = (data.jobs || []).slice(0, 25).map(j => ({
+      id: `remotive-${j.id}`,
       title: j.title,
       company: j.company_name,
       location: j.candidate_required_location || 'Remote',
-      type: j.job_type?.replace('_', '-') || 'Full-time',
+      type: j.job_type || 'full-time',
       salary: j.salary || '',
       tags: j.tags?.slice(0, 4) || [],
-      posted: new Date(j.publication_date).toLocaleDateString(),
-      url: j.url,
-      logo: j.company_logo,
-      description: j.description?.replace(/<[^>]*>/g, '').slice(0, 300) + '...',
       source: 'remotive',
-      emoji: '🌐',
+      logo: '🌐',
+      url: j.url,
+      postedAt: j.publication_date,
+      upvotes: 0,
     }))
-  } catch { return [] }
-}
+    jobs = [...jobs, ...remotive]
+  }
 
-async function fetchArbeitnow() {
-  try {
-    const r = await fetch('https://www.arbeitnow.com/api/job-board-api')
-    const d = await r.json()
-    return (d.data || []).slice(0, 20).map(j => ({
-      id: `arbeitnow_${j.slug}`,
+  // Arbeitnow
+  if (fetches[1].status === 'fulfilled') {
+    const data = fetches[1].value
+    const arbeit = (data.data || []).slice(0, 20).map(j => ({
+      id: `arbeit-${j.slug}`,
       title: j.title,
       company: j.company_name,
       location: j.location || 'Remote',
-      type: j.remote ? 'Remote' : 'On-site',
+      type: j.job_types?.[0] || 'full-time',
       salary: '',
       tags: j.tags?.slice(0, 4) || [],
-      posted: new Date(j.created_at * 1000).toLocaleDateString(),
-      url: j.url,
-      logo: j.company_logo,
-      description: j.description?.replace(/<[^>]*>/g, '').slice(0, 300) + '...',
       source: 'arbeitnow',
-      emoji: '🏢',
-    }))
-  } catch { return [] }
-}
-
-async function fetchRemoteOK() {
-  try {
-    const r = await fetch('https://remoteok.com/api', {
-      headers: { 'User-Agent': 'OpportuAI Job Board' }
-    })
-    const d = await r.json()
-    return (d || []).filter(j => j.id).slice(0, 20).map(j => ({
-      id: `remoteok_${j.id}`,
-      title: j.position,
-      company: j.company,
-      location: j.location || 'Remote',
-      type: 'Remote',
-      salary: j.salary || '',
-      tags: j.tags?.slice(0, 4) || [],
-      posted: new Date(j.date).toLocaleDateString(),
+      logo: '💼',
       url: j.url,
-      logo: j.company_logo,
-      description: j.description?.replace(/<[^>]*>/g, '').slice(0, 300) + '...',
-      source: 'remoteok',
-      emoji: '✅',
+      postedAt: j.created_at,
+      upvotes: 0,
     }))
-  } catch { return [] }
-}
-
-async function fetchHimalayas() {
-  try {
-    const r = await fetch('https://himalayas.app/jobs/api?limit=20')
-    const d = await r.json()
-    return (d.jobs || []).map(j => ({
-      id: `himalayas_${j.id}`,
-      title: j.title,
-      company: j.companyName,
-      location: j.locationRestrictions?.join(', ') || 'Remote',
-      type: j.employmentType || 'Full-time',
-      salary: j.salaryCurrency && j.salaryMin
-        ? `${j.salaryCurrency}${(j.salaryMin / 1000).toFixed(0)}k–${(j.salaryMax / 1000).toFixed(0)}k`
-        : '',
-      tags: j.skills?.slice(0, 4) || [],
-      posted: new Date(j.publishedAt).toLocaleDateString(),
-      url: j.applicationLink || j.url,
-      logo: j.companyLogo,
-      description: j.description?.replace(/<[^>]*>/g, '').slice(0, 300) + '...',
-      source: 'himalayas',
-      emoji: '🏔️',
-    }))
-  } catch { return [] }
-}
-
-async function fetchJobicy() {
-  try {
-    const r = await fetch('https://jobicy.com/api/v2/remote-jobs?count=20')
-    const d = await r.json()
-    return (d.jobs || []).map(j => ({
-      id: `jobicy_${j.id}`,
-      title: j.jobTitle,
-      company: j.companyName,
-      location: j.jobGeo || 'Remote',
-      type: j.jobType || 'Full-time',
-      salary: j.annualSalaryMin
-        ? `$${(j.annualSalaryMin / 1000).toFixed(0)}k–$${(j.annualSalaryMax / 1000).toFixed(0)}k`
-        : '',
-      tags: j.jobIndustry?.slice(0, 4) || [],
-      posted: new Date(j.pubDate).toLocaleDateString(),
-      url: j.url,
-      logo: j.companyLogo,
-      description: j.jobDescription?.replace(/<[^>]*>/g, '').slice(0, 300) + '...',
-      source: 'jobicy',
-      emoji: '💼',
-    }))
-  } catch { return [] }
-}
-
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600')
-
-  try {
-    const results = await Promise.allSettled([
-      fetchRemotive(),
-      fetchArbeitnow(),
-      fetchRemoteOK(),
-      fetchHimalayas(),
-      fetchJobicy(),
-    ])
-
-    const jobs = results.flatMap(r => r.status === 'fulfilled' ? r.value : [])
-    res.status(200).json({ jobs })
-  } catch (err) {
-    res.status(500).json({ jobs: [], error: err.message })
+    jobs = [...jobs, ...arbeit]
   }
+
+  // RemoteOK
+  if (fetches[2].status === 'fulfilled') {
+    const data = fetches[2].value
+    const rok = (Array.isArray(data) ? data : [])
+      .filter(j => j.id)
+      .slice(0, 20)
+      .map(j => ({
+        id: `rok-${j.id}`,
+        title: j.position,
+        company: j.company,
+        location: 'Remote',
+        type: 'full-time',
+        salary: j.salary || '',
+        tags: j.tags?.slice(0, 4) || [],
+        source: 'remoteok',
+        logo: '🖥️',
+        url: j.url,
+        postedAt: new Date(j.epoch * 1000).toISOString(),
+        upvotes: 0,
+      }))
+    jobs = [...jobs, ...rok]
+  }
+
+  res.status(200).json({ jobs })
 }
