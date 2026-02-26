@@ -20,179 +20,86 @@ export default function ProductsPage() {
   useEffect(() => {
     let arr = products
     if (cat !== 'All') arr = arr.filter(p=>p.category===cat)
-    if (search) arr = arr.filter(p=>
-      p.name?.toLowerCase().includes(search.toLowerCase()) ||
-      p.description?.toLowerCase().includes(search.toLowerCase())
-    )
+    if (search) arr = arr.filter(p=>p.name?.toLowerCase().includes(search.toLowerCase())||p.description?.toLowerCase().includes(search.toLowerCase()))
     setFiltered(arr)
   }, [cat, search, products])
 
   const featured = products.filter(p=>p.featured).slice(0,4)
 
   return (
-    <>
-      <style>{`
-        .prod-page { min-height:100vh; padding-top:54px; background:var(--black); }
-        .page-header {
-          padding:52px 24px 40px; border-bottom:1px solid var(--border);
-          background:radial-gradient(ellipse 70% 100% at 50% 0%, rgba(245,158,11,0.04), transparent);
-        }
-        .ph-inner { max-width:1120px; margin:0 auto; }
-        .ph-top { display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-bottom:24px; }
-        .ph-title { font-size:clamp(22px,4vw,32px); font-weight:800; color:#fff; letter-spacing:-.03em; }
-        .ph-sub { font-size:13px; color:#444; margin-top:4px; }
-        .search-box {
-          padding:9px 14px; background:var(--surface); border:1px solid var(--border);
-          border-radius:8px; font-size:13px; color:var(--text); font-family:inherit;
-          outline:none; width:220px; transition:all .2s;
-        }
-        .search-box::placeholder { color:#333; }
-        .search-box:focus { border-color:rgba(245,158,11,0.35); box-shadow:0 0 0 3px rgba(245,158,11,0.06); }
-        .filter-row { display:flex; flex-wrap:wrap; gap:6px; }
-        .filt {
-          padding:5px 12px; border-radius:6px; font-size:12px; font-weight:500;
-          border:1px solid var(--border); background:transparent; color:#444;
-          cursor:pointer; transition:all .15s; font-family:inherit;
-        }
-        .filt:hover { background:var(--surface); color:#888; }
-        .filt.on { background:var(--surface2); border-color:rgba(245,158,11,0.35); color:#f59e0b; }
-
-        .page-body { max-width:1120px; margin:0 auto; padding:36px 24px 72px; }
-
-        /* Featured row */
-        .feat-row { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:10px; margin-bottom:48px; }
-        .feat-card {
-          background:var(--surface); border:1px solid rgba(245,158,11,0.12);
-          border-radius:var(--radius); padding:20px;
-          text-decoration:none; display:block; transition:all .2s; position:relative;
-        }
-        .feat-card:hover {
-          border-color:rgba(245,158,11,0.25); background:var(--surface2);
-          transform:translateY(-1px); box-shadow:0 8px 28px rgba(0,0,0,.5);
-        }
-        .feat-label {
-          position:absolute; top:12px; right:12px;
-          padding:2px 7px; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.2);
-          border-radius:4px; font-size:10px; font-weight:600; color:#f59e0b; letter-spacing:.04em;
-        }
-        .fc-img { width:40px; height:40px; border-radius:8px; margin-bottom:12px; display:flex; align-items:center; justify-content:center; font-size:20px; background:var(--surface3); border:1px solid var(--border); }
-        .fc-name { font-size:13px; font-weight:600; color:#ddd; margin-bottom:4px; }
-        .fc-creator { font-size:11px; color:#333; margin-bottom:10px; }
-        .fc-desc { font-size:12px; color:#444; line-height:1.5; margin-bottom:14px; }
-        .fc-foot { display:flex; align-items:center; justify-content:space-between; }
-        .fc-price { font-size:13px; font-weight:700; color:#f59e0b; }
-        .fc-get { font-size:11px; color:#555; padding:4px 10px; background:var(--surface3); border:1px solid var(--border); border-radius:5px; }
-        .feat-card:hover .fc-get { color:#aaa; }
-
-        /* All products */
-        .prod-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:10px; }
-        .prod-card {
-          background:var(--surface); border:1px solid var(--border);
-          border-radius:var(--radius); padding:18px;
-          text-decoration:none; display:block; transition:all .2s;
-        }
-        .prod-card:hover {
-          border-color:var(--border-hover); background:var(--surface2);
-          transform:translateY(-1px); box-shadow:0 8px 28px rgba(0,0,0,.5);
-        }
-        .pc-head { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-        .pc-icon { font-size:18px; width:34px; height:34px; display:flex; align-items:center; justify-content:center; background:var(--surface3); border:1px solid var(--border); border-radius:7px; flex-shrink:0; }
-        .pc-name { font-size:13px; font-weight:600; color:#ddd; }
-        .pc-by { font-size:11px; color:#333; margin-top:2px; }
-        .pc-cat { font-size:10px; padding:2px 7px; background:var(--surface3); border:1px solid var(--border); border-radius:4px; color:#444; display:inline-block; margin-bottom:8px; font-weight:500; }
-        .pc-desc { font-size:12px; color:#444; line-height:1.5; margin-bottom:12px; }
-        .pc-foot { display:flex; align-items:center; justify-content:space-between; }
-        .pc-price { font-size:12px; font-weight:600; color:#f59e0b; }
-        .pc-get { font-size:11px; color:#555; }
-        .prod-card:hover .pc-get { color:#aaa; }
-        .count-bar { font-size:12px; color:#333; margin-bottom:20px; }
-        .sec-label { font-size:11px; font-weight:600; color:#333; letter-spacing:.06em; text-transform:uppercase; margin-bottom:16px; }
-        .empty { text-align:center; padding:80px 20px; color:#333; font-size:14px; }
-      `}</style>
-
-      <div className="prod-page">
-        <div className="page-header">
-          <div className="ph-inner">
-            <div className="ph-top">
-              <div>
-                <div className="eyebrow" style={{marginBottom:8,color:'#f59e0b'}}>Marketplace</div>
-                <h1 className="ph-title">Digital Products</h1>
-                <p className="ph-sub">Templates, courses, tools and resources from top creators</p>
-              </div>
-              <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
-                <input className="search-box" placeholder="Search products..." value={search} onChange={e=>setSearch(e.target.value)} />
-                <Link to="/submit-product" className="btn-primary" style={{fontSize:12,padding:'8px 14px',background:'#f59e0b',color:'#000'}}>+ Submit</Link>
-              </div>
+    <div style={{minHeight:'100vh',paddingTop:54,background:'#060606',color:'#ececec',fontFamily:'Inter,-apple-system,sans-serif'}}>
+      <div style={{padding:'52px 24px 40px',borderBottom:'1px solid rgba(255,255,255,0.06)',background:'radial-gradient(ellipse 70% 100% at 50% 0%, rgba(245,158,11,0.04), transparent)'}}>
+        <div style={{maxWidth:1120,margin:'0 auto'}}>
+          <div style={{display:'flex',alignItems:'flex-end',justifyContent:'space-between',flexWrap:'wrap',gap:16,marginBottom:24}}>
+            <div>
+              <div style={{fontSize:11,fontWeight:600,color:'#f59e0b',letterSpacing:'0.06em',textTransform:'uppercase',marginBottom:8}}>Marketplace</div>
+              <h1 style={{fontSize:'clamp(22px,4vw,32px)',fontWeight:800,color:'#fff',letterSpacing:'-0.03em',marginBottom:4}}>Digital Products</h1>
+              <p style={{fontSize:13,color:'#444'}}>Templates, courses, tools and resources from top creators</p>
             </div>
-            <div className="filter-row">
-              {cats.map(c=>(
-                <button key={c} className={`filt${cat===c?' on':''}`} onClick={()=>setCat(c)}>{c}</button>
-              ))}
+            <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
+              <input
+                placeholder="Search products..."
+                value={search}
+                onChange={e=>setSearch(e.target.value)}
+                style={{padding:'9px 14px',background:'#0d0d0d',border:'1px solid rgba(255,255,255,0.06)',borderRadius:8,fontSize:13,color:'#ececec',fontFamily:'inherit',outline:'none',width:220}}
+              />
+              <Link to="/submit-product" style={{padding:'9px 14px',background:'#f59e0b',color:'#000',fontWeight:600,fontSize:12,borderRadius:8,textDecoration:'none'}}>+ Submit</Link>
             </div>
           </div>
-        </div>
-
-        <div className="page-body">
-          {cat === 'All' && !search && featured.length > 0 && (
-            <div style={{marginBottom:48}}>
-              <div className="sec-label">Featured</div>
-              <div className="feat-row">
-                {featured.map((p,i)=>(
-                  <a key={p.id||i} href={p.website} target="_blank" rel="noopener noreferrer" className="feat-card">
-                    <span className="feat-label">Featured</span>
-                    <div className="fc-img">{p.logo||'📦'}</div>
-                    <div className="fc-name">{p.name}</div>
-                    <div className="fc-creator">{p.creator} · {p.platform}</div>
-                    <div className="fc-desc">{(p.description||'').slice(0,80)}...</div>
-                    <div className="fc-foot">
-                      <span className="fc-price">{p.pricing}</span>
-                      <span className="fc-get">Get it →</span>
-                    </div>
-                  </a>
-                ))}
-              </div>
-              <div className="divider" style={{marginBottom:36}}/>
-            </div>
-          )}
-
-          {loading ? (
-            <div className="prod-grid">
-              {[1,2,3,4,5,6].map(i=>(
-                <div key={i} className="prod-card" style={{opacity:.25}}>
-                  <div className="pc-head"><div className="pc-icon"/><div style={{width:80,height:12,background:'var(--surface3)',borderRadius:4}}/></div>
-                  <div style={{width:'90%',height:10,background:'var(--surface3)',borderRadius:4,marginBottom:6}}/>
-                  <div style={{width:'60%',height:10,background:'var(--surface3)',borderRadius:4}}/>
-                </div>
-              ))}
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="empty">No products found.</div>
-          ) : (
-            <>
-              <div className="count-bar">{filtered.length} products</div>
-              <div className="prod-grid">
-                {filtered.map((p,i)=>(
-                  <a key={p.id||i} href={p.website} target="_blank" rel="noopener noreferrer" className="prod-card">
-                    <div className="pc-head">
-                      <div className="pc-icon">{p.logo||'📦'}</div>
-                      <div>
-                        <div className="pc-name">{p.name}</div>
-                        <div className="pc-by">{p.creator}</div>
-                      </div>
-                    </div>
-                    <span className="pc-cat">{p.category}</span>
-                    <div className="pc-desc">{(p.description||'').slice(0,80)}...</div>
-                    <div className="pc-foot">
-                      <span className="pc-price">{p.pricing}</span>
-                      <span className="pc-get">Get it →</span>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </>
-          )}
+          <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+            {cats.map(c=>(
+              <button key={c} onClick={()=>setCat(c)} style={{padding:'5px 12px',borderRadius:6,fontSize:12,fontWeight:500,border:`1px solid ${cat===c?'rgba(245,158,11,0.35)':'rgba(255,255,255,0.06)'}`,background:cat===c?'#111':'transparent',color:cat===c?'#f59e0b':'#444',cursor:'pointer',fontFamily:'inherit',transition:'all .15s'}}>
+                {c}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
-    </>
+
+      <div style={{maxWidth:1120,margin:'0 auto',padding:'36px 24px 72px'}}>
+        {cat==='All'&&!search&&featured.length>0&&(
+          <div style={{marginBottom:48}}>
+            <div style={{fontSize:11,fontWeight:600,color:'#333',letterSpacing:'0.06em',textTransform:'uppercase',marginBottom:16}}>Featured</div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))',gap:10,marginBottom:32}}>
+              {featured.map((p,i)=>(
+                <a key={i} href={p.website} target="_blank" rel="noopener noreferrer" style={{display:'block',textDecoration:'none',background:'#0d0d0d',border:'1px solid rgba(245,158,11,0.12)',borderRadius:10,padding:20,transition:'all .2s',position:'relative'}}>
+                  <div style={{position:'absolute',top:12,right:12,padding:'2px 7px',background:'rgba(245,158,11,0.1)',border:'1px solid rgba(245,158,11,0.2)',borderRadius:4,fontSize:10,fontWeight:600,color:'#f59e0b'}}>Featured</div>
+                  <div style={{fontSize:22,marginBottom:12}}>{p.logo||'📦'}</div>
+                  <div style={{fontSize:13,fontWeight:600,color:'#ddd',marginBottom:4}}>{p.name}</div>
+                  <div style={{fontSize:11,color:'#333',marginBottom:10}}>{p.creator} · {p.platform}</div>
+                  <div style={{fontSize:12,color:'#444',lineHeight:1.5,marginBottom:14}}>{(p.description||'').slice(0,80)}...</div>
+                  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                    <span style={{fontSize:13,fontWeight:700,color:'#f59e0b'}}>{p.pricing}</span>
+                    <span style={{fontSize:11,color:'#555'}}>Get it →</span>
+                  </div>
+                </a>
+              ))}
+            </div>
+            <div style={{height:1,background:'rgba(255,255,255,0.06)',marginBottom:36}}/>
+          </div>
+        )}
+
+        <div style={{fontSize:12,color:'#333',marginBottom:20}}>{filtered.length} products</div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:10}}>
+          {filtered.map((p,i)=>(
+            <a key={i} href={p.website} target="_blank" rel="noopener noreferrer" style={{display:'block',textDecoration:'none',background:'#0d0d0d',border:'1px solid rgba(255,255,255,0.06)',borderRadius:10,padding:18,transition:'all .2s'}}>
+              <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
+                <div style={{fontSize:18,width:34,height:34,display:'flex',alignItems:'center',justifyContent:'center',background:'#111',border:'1px solid rgba(255,255,255,0.06)',borderRadius:7,flexShrink:0}}>{p.logo||'📦'}</div>
+                <div>
+                  <div style={{fontSize:13,fontWeight:600,color:'#ddd'}}>{p.name}</div>
+                  <div style={{fontSize:11,color:'#333',marginTop:2}}>{p.creator}</div>
+                </div>
+              </div>
+              <div style={{display:'inline-block',padding:'2px 7px',background:'#111',border:'1px solid rgba(255,255,255,0.06)',borderRadius:4,fontSize:10,fontWeight:600,color:'#444',marginBottom:8}}>{p.category}</div>
+              <div style={{fontSize:12,color:'#444',lineHeight:1.5,marginBottom:12}}>{(p.description||'').slice(0,80)}...</div>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                <span style={{fontSize:12,fontWeight:600,color:'#f59e0b'}}>{p.pricing}</span>
+                <span style={{fontSize:11,color:'#555'}}>Get it →</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
   )
 }
