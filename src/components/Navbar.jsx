@@ -19,6 +19,7 @@ export default function Navbar({ onOpenMatcher, onOpenSubmit, onOpenAuth }) {
     { label: 'Freelance', to: '/jobs?tab=freelance' },
     { label: 'Resume AI', to: '/resume' },
     { label: 'Launches', to: '/' },
+    { label: 'Post a Job', to: '/post-job' },
   ]
 
   const isActive = (to) => location.pathname === to.split('?')[0]
