@@ -15,6 +15,8 @@ import DashboardPage from './pages/DashboardPage'
 import ResumePage from './pages/ResumePage'
 import PostJobPage from './pages/PostJobPage'
 import AdminPage from './pages/AdminPage'
+import ToolsPage from './pages/ToolsPage'
+import SubmitToolPage from './pages/SubmitToolPage'
 import { usePageView } from './hooks/usePageView'
 
 function PostPage({ onOpen }) {
@@ -66,6 +68,8 @@ function AppInner() {
         } />
         <Route path="/resume" element={<ResumePage />} />
         <Route path="/post" element={<PostPage onOpen={() => setShowSubmit(true)} />} />
+        <Route path="/tools" element={<ToolsPage />} />
+        <Route path="/submit-tool" element={<SubmitToolPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/post-job" element={<PostJobPage />} />
         <Route path="/dashboard" element={<DashboardPage allJobs={jobs.allJobs} />} />
