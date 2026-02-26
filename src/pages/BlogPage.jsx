@@ -1,83 +1,132 @@
 import { useState, useEffect } from 'react'
-
-const CATEGORIES = ['All', 'Remote Work Tips', 'Job Search Advice', 'SaaS & Tools Reviews']
+import { Link } from 'react-router-dom'
 
 export default function BlogPage() {
   const [posts, setPosts] = useState([])
+  const [cat, setCat] = useState('All')
   const [loading, setLoading] = useState(true)
-  const [category, setCategory] = useState('All')
+
+  const cats = ['All','Remote Work','SaaS Reviews','Career Tips','Tools']
 
   useEffect(() => {
-    fetch('/api/blog')
-      .then(r => r.json())
-      .then(d => { setPosts(d.posts || []); setLoading(false) })
-      .catch(() => setLoading(false))
+    fetch('/api/blog').then(r=>r.json()).then(d=>{
+      const arr = Array.isArray(d)?d:(d.posts||[])
+      setPosts(arr); setLoading(false)
+    }).catch(()=>setLoading(false))
   }, [])
 
-  const filtered = category === 'All' ? posts : posts.filter(p => p.category === category)
-  const featured = posts.filter(p => p.featured).slice(0, 3)
+  const filtered = cat==='All' ? posts : posts.filter(p=>p.category===cat)
+  const featured = posts.find(p=>p.featured) || posts[0]
+  const rest = filtered.filter(p=>p.slug!==featured?.slug)
 
   return (
-    <div style={{minHeight:'100vh',background:'#0d0d0d',padding:'40px 20px',fontFamily:'Inter,sans-serif'}}>
-      <div style={{maxWidth:1100,margin:'0 auto'}}>
+    <>
+      <style>{`
+        .blog-page { min-height:100vh; padding-top:54px; background:var(--black); }
+        .page-header {
+          padding:52px 24px 40px; border-bottom:1px solid var(--border);
+          background:radial-gradient(ellipse 70% 100% at 50% 0%, rgba(99,102,241,0.04), transparent);
+        }
+        .ph-inner { max-width:1120px; margin:0 auto; }
+        .ph-title { font-size:clamp(22px,4vw,32px); font-weight:800; color:#fff; letter-spacing:-.03em; margin-bottom:4px; }
+        .ph-sub { font-size:13px; color:#444; margin-bottom:24px; }
+        .filter-row { display:flex; flex-wrap:wrap; gap:6px; }
+        .filt {
+          padding:5px 12px; border-radius:6px; font-size:12px; font-weight:500;
+          border:1px solid var(--border); background:transparent; color:#444;
+          cursor:pointer; transition:all .15s; font-family:inherit;
+        }
+        .filt:hover { background:var(--surface); color:#888; }
+        .filt.on { background:var(--surface2); border-color:rgba(99,102,241,0.35); color:#818cf8; }
+        .page-body { max-width:1120px; margin:0 auto; padding:36px 24px 72px; }
 
-        {/* Header */}
-        <div style={{textAlign:'center',marginBottom:48}}>
-          <span style={{display:'inline-block',background:'rgba(201,168,76,0.15)',color:'#c9a84c',border:'1px solid rgba(201,168,76,0.3)',borderRadius:20,padding:'4px 16px',fontSize:13,fontWeight:600,marginBottom:16}}>Blog</span>
-          <h1 style={{fontFamily:'Syne,sans-serif',fontSize:'clamp(32px,5vw,52px)',fontWeight:800,color:'#fff',margin:'0 0 12px',letterSpacing:'-1px'}}>Remote Work Insights</h1>
-          <p style={{color:'#888',fontSize:16,margin:0}}>Tips, tools, and strategies for the modern remote worker</p>
-        </div>
+        /* Featured */
+        .feat-post {
+          display:block; text-decoration:none;
+          background:var(--surface); border:1px solid var(--border);
+          border-radius:var(--radius-lg); padding:32px;
+          margin-bottom:32px; transition:all .2s; position:relative; overflow:hidden;
+        }
+        .feat-post::before {
+          content:''; position:absolute; inset:0; pointer-events:none;
+          background:radial-gradient(ellipse 80% 120% at 0% 0%, rgba(99,102,241,0.05), transparent);
+        }
+        .feat-post:hover { border-color:var(--border-hover); transform:translateY(-1px); box-shadow:0 12px 40px rgba(0,0,0,.5); }
+        .feat-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.2); border-radius:4px; font-size:10px; font-weight:600; color:#818cf8; letter-spacing:.04em; margin-bottom:14px; }
+        .feat-title { font-size:clamp(18px,3vw,24px); font-weight:700; color:#fff; letter-spacing:-.025em; line-height:1.25; margin-bottom:10px; }
+        .feat-excerpt { font-size:13px; color:#444; line-height:1.65; margin-bottom:16px; }
+        .feat-meta { display:flex; align-items:center; gap:12px; font-size:11px; color:#333; }
+        .feat-cat { padding:2px 7px; background:var(--surface3); border:1px solid var(--border); border-radius:4px; color:#444; font-weight:500; }
 
-        {/* Featured */}
-        {featured.length > 0 && category === 'All' && (
-          <div style={{marginBottom:48}}>
-            <div style={{fontSize:12,color:'#c9a84c',fontWeight:700,letterSpacing:2,textTransform:'uppercase',marginBottom:20}}>Featured Posts</div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))',gap:20}}>
-              {featured.map(post => <PostCard key={post.id} post={post} featured />)}
+        /* Posts grid */
+        .posts-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:10px; }
+        .post-card {
+          display:block; text-decoration:none;
+          background:var(--surface); border:1px solid var(--border);
+          border-radius:var(--radius); padding:20px; transition:all .2s;
+        }
+        .post-card:hover { border-color:var(--border-hover); background:var(--surface2); transform:translateY(-1px); box-shadow:0 8px 28px rgba(0,0,0,.5); }
+        .pc-cat { display:inline-block; padding:2px 7px; background:var(--surface3); border:1px solid var(--border); border-radius:4px; font-size:10px; font-weight:600; color:#444; letter-spacing:.04em; margin-bottom:10px; }
+        .pc-title { font-size:14px; font-weight:600; color:#ddd; line-height:1.35; margin-bottom:8px; }
+        .pc-excerpt { font-size:12px; color:#444; line-height:1.55; margin-bottom:14px; }
+        .pc-meta { font-size:11px; color:#333; display:flex; align-items:center; justify-content:space-between; }
+        .pc-read { color:#818cf8; font-weight:500; }
+        .empty { text-align:center; padding:80px 20px; color:#333; font-size:14px; }
+      `}</style>
+
+      <div className="blog-page">
+        <div className="page-header">
+          <div className="ph-inner">
+            <div className="eyebrow" style={{marginBottom:8}}>Editorial</div>
+            <h1 className="ph-title">Blog</h1>
+            <p className="ph-sub">Remote work tips, SaaS reviews, and career advice</p>
+            <div className="filter-row">
+              {cats.map(c=>(
+                <button key={c} className={`filt${cat===c?' on':''}`} onClick={()=>setCat(c)}>{c}</button>
+              ))}
             </div>
           </div>
-        )}
-
-        {/* Filters */}
-        <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:32}}>
-          {CATEGORIES.map(c => (
-            <button key={c} onClick={()=>setCategory(c)} style={{padding:'7px 16px',borderRadius:20,fontSize:13,border:'1.5px solid',borderColor:category===c?'#c9a84c':'#2a2a2a',color:category===c?'#c9a84c':'#888',background:category===c?'rgba(201,168,76,0.12)':'transparent',cursor:'pointer',transition:'all 0.15s'}}>
-              {c}
-            </button>
-          ))}
         </div>
 
-        {/* Grid */}
-        {loading ? (
-          <div style={{textAlign:'center',color:'#888',padding:60}}>Loading posts...</div>
-        ) : (
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))',gap:20}}>
-            {filtered.map(post => <PostCard key={post.id} post={post} />)}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-function PostCard({ post, featured }) {
-  return (
-    <a href={`/blog/${post.slug}`} style={{background:featured?'#131310':'#111',border:`1px solid ${featured?'rgba(201,168,76,0.2)':'#1e1e1e'}`,borderRadius:16,padding:24,display:'flex',flexDirection:'column',gap:14,textDecoration:'none',transition:'all 0.2s'}}
-      onMouseEnter={e=>{e.currentTarget.style.borderColor='#c9a84c';e.currentTarget.style.transform='translateY(-3px)'}}
-      onMouseLeave={e=>{e.currentTarget.style.borderColor=featured?'rgba(201,168,76,0.2)':'#1e1e1e';e.currentTarget.style.transform='translateY(0)'}}>
-      <div style={{fontSize:40}}>{post.emoji || '📝'}</div>
-      <div>
-        <div style={{display:'flex',gap:8,marginBottom:10,flexWrap:'wrap'}}>
-          <span style={{background:'rgba(201,168,76,0.12)',color:'#c9a84c',fontSize:11,fontWeight:600,padding:'3px 10px',borderRadius:8}}>{post.category}</span>
-          {featured && <span style={{background:'rgba(201,168,76,0.2)',color:'#c9a84c',fontSize:11,fontWeight:700,padding:'3px 10px',borderRadius:8}}>Featured</span>}
+        <div className="page-body">
+          {loading ? (
+            <div style={{opacity:.25}}>
+              <div className="feat-post"><div style={{width:'60%',height:22,background:'var(--surface3)',borderRadius:4}}/></div>
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="empty">No posts yet.</div>
+          ) : (
+            <>
+              {featured && cat==='All' && (
+                <Link to={`/blog/${featured.slug}`} className="feat-post">
+                  <div className="feat-badge">✦ Featured</div>
+                  <h2 className="feat-title">{featured.title}</h2>
+                  <p className="feat-excerpt">{(featured.excerpt||featured.content||'').slice(0,160)}...</p>
+                  <div className="feat-meta">
+                    <span className="feat-cat">{featured.category}</span>
+                    <span>{featured.author}</span>
+                    <span>{featured.read_time||'5 min read'}</span>
+                    <span style={{marginLeft:'auto',color:'#818cf8',fontWeight:500}}>Read →</span>
+                  </div>
+                </Link>
+              )}
+              <div className="posts-grid">
+                {(cat==='All'?rest:filtered).map((p,i)=>(
+                  <Link key={p.slug||i} to={`/blog/${p.slug}`} className="post-card">
+                    <span className="pc-cat">{p.category}</span>
+                    <h3 className="pc-title">{p.title}</h3>
+                    <p className="pc-excerpt">{(p.excerpt||p.content||'').slice(0,100)}...</p>
+                    <div className="pc-meta">
+                      <span>{p.read_time||'5 min read'}</span>
+                      <span className="pc-read">Read →</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </>
+          )}
         </div>
-        <h2 style={{color:'#fff',fontSize:17,fontWeight:700,margin:'0 0 8px',lineHeight:1.4}}>{post.title}</h2>
-        <p style={{color:'#777',fontSize:13,lineHeight:1.55,margin:0}}>{post.excerpt}</p>
       </div>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginTop:'auto',paddingTop:12,borderTop:'1px solid #1a1a1a'}}>
-        <span style={{color:'#555',fontSize:12}}>{post.readTime} · {new Date(post.publishedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span>
-        <span style={{color:'#c9a84c',fontSize:13,fontWeight:600}}>Read →</span>
-      </div>
-    </a>
+    </>
   )
 }
