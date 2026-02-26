@@ -2,10 +2,19 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET')
 
+  const SUPABASE_URL = process.env.VITE_SUPABASE_URL
+  const SUPABASE_KEY = process.env.VITE_SUPABASE_ANON_KEY
+
   const fetches = await Promise.allSettled([
     fetch('https://remotive.com/api/remote-jobs?limit=25').then(r => r.json()),
     fetch('https://arbeitnow.com/api/job-board-api').then(r => r.json()),
     fetch('https://remoteok.com/api').then(r => r.json()),
+    fetch(`${SUPABASE_URL}/rest/v1/job_submissions?status=eq.approved&select=*`, {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+      }
+    }).then(r => r.json()),
   ])
 
   let jobs = []
@@ -71,6 +80,25 @@ export default async function handler(req, res) {
         upvotes: 0,
       }))
     jobs = [...jobs, ...rok]
+  }
+
+  // Approved community submissions from Supabase
+  if (fetches[3].status === 'fulfilled' && Array.isArray(fetches[3].value)) {
+    const approved = fetches[3].value.map(j => ({
+      id: `community-${j.id}`,
+      title: j.title,
+      company: j.company,
+      location: j.location,
+      type: j.type,
+      salary: j.salary || '',
+      tags: j.tags || [],
+      source: 'community',
+      logo: j.logo || '🏢',
+      url: j.url || '#',
+      postedAt: j.created_at,
+      upvotes: 0,
+    }))
+    jobs = [...jobs, ...approved]
   }
 
   res.status(200).json({ jobs })
