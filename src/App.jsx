@@ -14,6 +14,7 @@ import JobsPage from './pages/JobsPage'
 import DashboardPage from './pages/DashboardPage'
 import ResumePage from './pages/ResumePage'
 import PostJobPage from './pages/PostJobPage'
+import AdminPage from './pages/AdminPage'
 
 function PostPage({ onOpen }) {
   const navigate = useNavigate()
@@ -61,6 +62,7 @@ function AppInner() {
         } />
         <Route path="/resume" element={<ResumePage />} />
         <Route path="/post" element={<PostPage onOpen={() => setShowSubmit(true)} />} />
+        <Route path="/admin" element={<AdminPage />} />
         <Route path="/post-job" element={<PostJobPage />} />
         <Route path="/dashboard" element={<DashboardPage allJobs={jobs.allJobs} />} />
       </Routes>
