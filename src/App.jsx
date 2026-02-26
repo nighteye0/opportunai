@@ -15,6 +15,7 @@ import DashboardPage from './pages/DashboardPage'
 import ResumePage from './pages/ResumePage'
 import PostJobPage from './pages/PostJobPage'
 import AdminPage from './pages/AdminPage'
+import { usePageView } from './hooks/usePageView'
 
 function PostPage({ onOpen }) {
   const navigate = useNavigate()
@@ -24,6 +25,7 @@ function PostPage({ onOpen }) {
 
 function AppInner() {
   const [showAuth, setShowAuth] = useState(null)
+  usePageView()
   const [showMatcher, setShowMatcher] = useState(false)
   const [showSubmit, setShowSubmit] = useState(false)
   const [showAPI, setShowAPI] = useState(false)
