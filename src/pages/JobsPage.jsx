@@ -1,175 +1,103 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+
+const CATS = ['All','Engineering','Design','Marketing','DevOps','Sales','Product','Customer Success','Data','AI / ML','Other']
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState([])
   const [filtered, setFiltered] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
   const [cat, setCat] = useState('All')
-  const [params] = useSearchParams()
-
-  const cats = ['All','Engineering','Design','Marketing','DevOps','Sales','Product','Customer Success','Data','AI / ML','Other']
+  const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const q = params.get('search') || ''
-    setSearch(q)
-    fetch('/api/jobs').then(r=>r.json()).then(d=>{
-      const arr = Array.isArray(d)?d:(d.jobs||[])
-      setJobs(arr); setLoading(false)
-    }).catch(()=>setLoading(false))
+    fetch('/api/jobs').then(r => r.json()).then(d => {
+      const arr = Array.isArray(d) ? d : (d.jobs || [])
+      setJobs(arr); setFiltered(arr); setLoading(false)
+    }).catch(() => setLoading(false))
   }, [])
 
   useEffect(() => {
     let arr = jobs
-    if (search) arr = arr.filter(j=>
-      j.title?.toLowerCase().includes(search.toLowerCase()) ||
-      j.company_name?.toLowerCase().includes(search.toLowerCase()) ||
-      j.company?.toLowerCase().includes(search.toLowerCase()) ||
-      j.tags?.some(t=>t.toLowerCase().includes(search.toLowerCase()))
-    )
-    if (cat !== 'All') arr = arr.filter(j=>
-      j.category?.toLowerCase().includes(cat.toLowerCase()) ||
-      j.tags?.some(t=>t.toLowerCase().includes(cat.toLowerCase()))
+    if (cat !== 'All') arr = arr.filter(j => j.category === cat || j.type === cat)
+    if (search) arr = arr.filter(j =>
+      (j.title||'').toLowerCase().includes(search.toLowerCase()) ||
+      (j.company||'').toLowerCase().includes(search.toLowerCase())
     )
     setFiltered(arr)
-  }, [search, cat, jobs])
+  }, [cat, search, jobs])
+
+  const pill = (active) => ({
+    padding:'6px 14px', borderRadius:100, fontSize:12, fontWeight:500,
+    border:`1px solid ${active ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.07)'}`,
+    background: active ? 'rgba(34,197,94,0.08)' : 'transparent',
+    color: active ? '#22c55e' : '#555', cursor:'pointer',
+    fontFamily:'inherit', transition:'all 0.15s', whiteSpace:'nowrap'
+  })
+
+  const tag = (color) => ({
+    padding:'3px 8px', borderRadius:5, fontSize:11, fontWeight:500, whiteSpace:'nowrap',
+    background: color==='green' ? 'rgba(34,197,94,0.08)' : color==='amber' ? 'rgba(245,158,11,0.08)' : 'rgba(255,255,255,0.04)',
+    border: `1px solid ${color==='green' ? 'rgba(34,197,94,0.15)' : color==='amber' ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.06)'}`,
+    color: color==='green' ? '#22c55e' : color==='amber' ? '#f59e0b' : '#555'
+  })
 
   return (
-    <>
-      <style>{`
-        .jobs-page { min-height:100vh; padding-top:54px; background:var(--black); }
-        .page-header {
-          padding:52px 24px 40px; border-bottom:1px solid var(--border);
-          background:radial-gradient(ellipse 70% 100% at 50% 0%, rgba(34,197,94,0.04), transparent);
-        }
-        .ph-inner { max-width:1120px; margin:0 auto; }
-        .ph-top { display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-bottom:24px; }
-        .ph-title { font-size:clamp(22px,4vw,32px); font-weight:800; color:#fff; letter-spacing:-.03em; }
-        .ph-sub { font-size:13px; color:#444; margin-top:4px; }
-        .search-box {
-          padding:9px 14px; background:var(--surface); border:1px solid var(--border);
-          border-radius:8px; font-size:13px; color:var(--text); font-family:inherit;
-          outline:none; width:260px; transition:all .2s;
-        }
-        .search-box::placeholder { color:#333; }
-        .search-box:focus { border-color:rgba(34,197,94,0.4); box-shadow:0 0 0 3px rgba(34,197,94,0.06); }
-        .filter-row { display:flex; flex-wrap:wrap; gap:6px; }
-        .filt {
-          padding:5px 12px; border-radius:6px; font-size:12px; font-weight:500;
-          border:1px solid var(--border); background:transparent; color:#444;
-          cursor:pointer; transition:all .15s; font-family:inherit;
-        }
-        .filt:hover { background:var(--surface); color:#888; }
-        .filt.on { background:var(--surface2); border-color:rgba(34,197,94,0.35); color:#4ade80; }
-
-        .page-body { max-width:1120px; margin:0 auto; padding:36px 24px 72px; }
-        .count-bar { font-size:12px; color:#333; margin-bottom:20px; display:flex; align-items:center; gap:8px; }
-        .live-badge {
-          display:inline-flex; align-items:center; gap:5px;
-          padding:2px 8px; background:rgba(34,197,94,0.07); border:1px solid rgba(34,197,94,0.15);
-          border-radius:100px; font-size:10px; color:#4ade80; font-weight:500;
-        }
-        .ldot { width:5px;height:5px;border-radius:50%;background:#22c55e;animation:pulse-dot 2s ease-in-out infinite; }
-
-        .jobs-list { display:flex; flex-direction:column; gap:6px; }
-        .job-row {
-          display:flex; align-items:center; gap:14px;
-          padding:16px 18px; background:var(--surface); border:1px solid var(--border);
-          border-radius:var(--radius); text-decoration:none; transition:all .2s;
-        }
-        .job-row:hover {
-          background:var(--surface2); border-color:var(--border-hover);
-          transform:translateX(2px); box-shadow:0 4px 20px rgba(0,0,0,.4);
-        }
-        .jr-logo {
-          width:36px;height:36px;border-radius:8px;flex-shrink:0;
-          background:var(--surface3);border:1px solid var(--border);
-          display:flex;align-items:center;justify-content:center;font-size:15px;overflow:hidden;
-        }
-        .jr-logo img { width:100%;height:100%;object-fit:cover; }
-        .jr-main { flex:1; min-width:0; }
-        .jr-title { font-size:13px; font-weight:600; color:#ddd; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .jr-co { font-size:11px; color:#444; }
-        .jr-tags { display:flex; gap:5px; flex-wrap:wrap; margin-left:auto; }
-        .jr-tag { padding:2px 7px; border-radius:4px; font-size:11px; font-weight:500; background:var(--surface3); border:1px solid var(--border); color:#444; white-space:nowrap; }
-        .jr-tag-g { background:rgba(34,197,94,0.05); border-color:rgba(34,197,94,0.12); color:#4ade80; }
-        .jr-apply {
-          padding:5px 12px; border-radius:6px; font-size:11px; font-weight:600;
-          background:transparent; border:1px solid var(--border); color:#555;
-          flex-shrink:0; transition:all .15s;
-        }
-        .job-row:hover .jr-apply { background:var(--surface3); color:#aaa; border-color:var(--border-hover); }
-
-        .skeleton { opacity:.2; }
-        .empty { text-align:center; padding:80px 20px; color:#333; font-size:14px; }
-
-        @media(max-width:640px) {
-          .jr-tags { display:none; }
-        }
-      `}</style>
-
-      <div className="jobs-page">
-        <div className="page-header">
-          <div className="ph-inner">
-            <div className="ph-top">
-              <div>
-                <div className="eyebrow" style={{marginBottom:8,color:'#4ade80'}}>Live feed</div>
-                <h1 className="ph-title">Remote Jobs</h1>
-                <p className="ph-sub">Updated daily from 5 sources worldwide</p>
-              </div>
-              <input
-                className="search-box"
-                placeholder="Search jobs, companies..."
-                value={search}
-                onChange={e=>setSearch(e.target.value)}
-              />
+    <div style={{minHeight:'100vh', paddingTop:56, background:'#060606', color:'#e8e8e8', fontFamily:"'DM Sans',-apple-system,sans-serif"}}>
+      <div style={{padding:'48px 24px 36px', borderBottom:'1px solid rgba(255,255,255,0.07)', background:'radial-gradient(ellipse 70% 80% at 50% 0%, rgba(34,197,94,0.04), transparent)'}}>
+        <div style={{maxWidth:1120, margin:'0 auto'}}>
+          <div style={{fontSize:11, fontWeight:700, color:'rgba(34,197,94,0.7)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:6}}>Live Feed</div>
+          <h1 style={{fontFamily:"'Syne','system-ui',sans-serif", fontSize:'clamp(22px,4vw,32px)', fontWeight:800, letterSpacing:'-0.03em', color:'#fff', marginBottom:4}}>Remote Jobs</h1>
+          <p style={{fontSize:13, color:'#555', marginBottom:28}}>Updated daily from 5 sources worldwide</p>
+          <div style={{display:'flex', alignItems:'flex-start', justifyContent:'space-between', flexWrap:'wrap', gap:12, marginBottom:8}}>
+            <div style={{display:'flex', gap:6, flexWrap:'wrap'}}>
+              {CATS.map(c => <button key={c} style={pill(cat===c)} onClick={() => setCat(c)}>{c}</button>)}
             </div>
-            <div className="filter-row">
-              {cats.map(c=>(
-                <button key={c} className={`filt${cat===c?' on':''}`} onClick={()=>setCat(c)}>{c}</button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="page-body">
-          <div className="count-bar">
-            <span className="live-badge"><span className="ldot"/>Live</span>
-            {loading ? 'Loading...' : `${filtered.length} jobs`}
-          </div>
-
-          <div className="jobs-list">
-            {loading ? [1,2,3,4,5,6,7,8].map(i=>(
-              <div key={i} className="job-row skeleton">
-                <div className="jr-logo"/>
-                <div className="jr-main">
-                  <div style={{width:'45%',height:12,background:'var(--surface3)',borderRadius:4,marginBottom:6}}/>
-                  <div style={{width:'25%',height:10,background:'var(--surface3)',borderRadius:4}}/>
-                </div>
-              </div>
-            )) : filtered.length === 0 ? (
-              <div className="empty">No jobs found for "{search}"</div>
-            ) : filtered.map((j,i)=>(
-              <a key={j.id||i} href={j.url} target="_blank" rel="noopener noreferrer" className="job-row">
-                <div className="jr-logo">
-                  {j.company_logo?<img src={j.company_logo} alt=""/>:'🏢'}
-                </div>
-                <div className="jr-main">
-                  <div className="jr-title">{j.title}</div>
-                  <div className="jr-co">{j.company_name||j.company}</div>
-                </div>
-                <div className="jr-tags">
-                  {j.job_type&&<span className="jr-tag">{j.job_type}</span>}
-                  {j.candidate_required_location&&<span className="jr-tag">{j.candidate_required_location}</span>}
-                  {j.salary&&<span className="jr-tag jr-tag-g">{j.salary}</span>}
-                </div>
-                <span className="jr-apply">Apply →</span>
-              </a>
-            ))}
+            <input
+              style={{padding:'9px 14px', background:'#0f0f0f', border:'1px solid rgba(255,255,255,0.07)', borderRadius:9, fontSize:13, color:'#e8e8e8', fontFamily:'inherit', outline:'none', width:240}}
+              placeholder="Search jobs, companies..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
           </div>
         </div>
       </div>
-    </>
+
+      <div style={{maxWidth:1120, margin:'0 auto', padding:'28px 24px 80px'}}>
+        <div style={{fontSize:12, color:'#333', marginBottom:16, display:'flex', alignItems:'center', gap:8}}>
+          <span style={{width:7, height:7, background:'#22c55e', borderRadius:'50%', display:'inline-block'}} />
+          <span style={{color:'#22c55e', fontWeight:600}}>{filtered.length} jobs</span>
+        </div>
+        <div style={{background:'#0a0a0a', border:'1px solid rgba(255,255,255,0.07)', borderRadius:12, overflow:'hidden'}}>
+          {loading ? Array.from({length:8}).map((_,i) => (
+            <div key={i} style={{display:'flex', alignItems:'center', padding:'14px 18px', borderBottom:'1px solid rgba(255,255,255,0.04)', gap:14, opacity:0.25}}>
+              <div style={{width:38, height:38, borderRadius:9, background:'#111'}} />
+              <div style={{flex:1}}>
+                <div style={{height:11, background:'rgba(255,255,255,0.06)', borderRadius:4, width:'40%', marginBottom:7}} />
+                <div style={{height:9, background:'rgba(255,255,255,0.04)', borderRadius:4, width:'25%'}} />
+              </div>
+            </div>
+          )) : filtered.map((j,i) => (
+            <a key={i} href={j.url||j.link||'#'} target="_blank" rel="noopener noreferrer"
+              style={{display:'flex', alignItems:'center', padding:'14px 18px', borderBottom:'1px solid rgba(255,255,255,0.04)', gap:14, textDecoration:'none', color:'inherit', transition:'background 0.15s'}}
+              onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.02)'}
+              onMouseLeave={e => e.currentTarget.style.background='transparent'}
+            >
+              <div style={{width:38, height:38, borderRadius:9, background:'#111', border:'1px solid rgba(255,255,255,0.07)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:17, flexShrink:0}}>
+                {j.company_emoji||j.emoji||'💼'}
+              </div>
+              <div style={{flex:1, minWidth:0}}>
+                <div style={{fontSize:13, fontWeight:600, color:'#e0e0e0', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{j.title||j.position}</div>
+                <div style={{fontSize:12, color:'#444', marginTop:2}}>{j.company}{j.location ? ` · ${j.location}` : ''}</div>
+              </div>
+              <div style={{display:'flex', gap:6, flexShrink:0}}>
+                {j.salary && <span style={tag('amber')}>{j.salary}</span>}
+                <span style={tag('green')}>Remote</span>
+                <span style={tag('')}>{j.category||j.type||'Full-time'}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
   )
 }
