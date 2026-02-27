@@ -1,3 +1,4 @@
+import SubmitPage from './pages/SubmitPage'
 import React from 'react'
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
@@ -80,7 +81,8 @@ function AppInner() {
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/post-job" element={<PostJobPage />} />
         <Route path="/dashboard" element={<DashboardPage allJobs={jobs.allJobs} />} />
-      </Routes></ErrorBoundary>
+        <Route path='/submit' element={<SubmitPage />} />
+        </Routes></ErrorBoundary>
 
       {showAuth && <AuthModal mode={showAuth} onClose={() => setShowAuth(null)} />}
       {showMatcher && <AIJobMatcher allJobs={jobs.allJobs} onMatchResult={(ids) => { setMatchedIds(ids); setShowMatcher(false) }} onClose={() => setShowMatcher(false)} />}

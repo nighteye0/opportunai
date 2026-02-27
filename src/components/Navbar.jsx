@@ -49,7 +49,7 @@ export default function Navbar() {
 
           {!mobile && (
             <div style={{display:'flex', alignItems:'center', gap:2}}>
-              {[['/', 'Home'],['/jobs','Jobs'],['/tools','Tools'],['/products','Products'],['/blog','Blog']].map(([href, label]) => (
+              {[['/', 'Home'],['/jobs','Jobs'],['/tools','Tools'],['/products','Products'],['/blog','Blog'],['/submit','Submit']].map(([href, label]) => (
                 <Link key={href} to={href} style={linkStyle(href)}>{label}</Link>
               ))}
             </div>
@@ -88,7 +88,7 @@ export default function Navbar() {
           padding:'16px 20px 24px', zIndex:99,
           display:'flex', flexDirection:'column', gap:4
         }}>
-          {[['/', 'Home'],['/jobs','Jobs'],['/tools','Tools'],['/products','Products'],['/blog','Blog']].map(([href, label]) => (
+          {[['/', 'Home'],['/jobs','Jobs'],['/tools','Tools'],['/products','Products'],['/blog','Blog'],['/submit','Submit']].map(([href, label]) => (
             <Link key={href} to={href} style={{
               padding:'13px 16px', fontSize:15, fontWeight:500,
               color: isActive(href) ? '#e8e8e8' : '#666',
