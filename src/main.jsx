@@ -1,8 +1,11 @@
-import './index.css'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import './index.css'
 import './styles/global.css'
 import App from './App'
+import { inject } from '@vercel/analytics'
+
+inject()
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
