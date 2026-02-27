@@ -31,9 +31,9 @@ export default function HomePage() {
     try {
       const r = await fetch('/api/newsletter',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})})
       const d = await r.json()
-      setSubMsg(d.message||'You're in!')
+      setSubMsg(d.message||'You are in!')
       setEmail('')
-    } catch { setSubMsg('You're in!') }
+    } catch { setSubMsg('You are in!') }
   }
 
   const tags = ['Engineering','Design','Marketing','DevOps','AI / ML','Product','Customer Success']
