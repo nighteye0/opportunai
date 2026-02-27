@@ -1,3 +1,4 @@
+import React from 'react'
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import { AuthProvider } from './hooks/useAuth'
@@ -59,7 +60,7 @@ function AppInner() {
         onOpenAuth={(mode) => setShowAuth(mode)}
       />
 
-      <Routes>
+      <ErrorBoundary><Routes>
         <Route path="/" element={<HomePage onOpenMatcher={() => setShowMatcher(true)} onOpenSubmit={() => setShowSubmit(true)} allJobs={jobs.allJobs} />} />
         <Route path="/jobs" element={
           <JobsPage
@@ -79,7 +80,7 @@ function AppInner() {
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/post-job" element={<PostJobPage />} />
         <Route path="/dashboard" element={<DashboardPage allJobs={jobs.allJobs} />} />
-      </Routes>
+      </Routes></ErrorBoundary>
 
       {showAuth && <AuthModal mode={showAuth} onClose={() => setShowAuth(null)} />}
       {showMatcher && <AIJobMatcher allJobs={jobs.allJobs} onMatchResult={(ids) => { setMatchedIds(ids); setShowMatcher(false) }} onClose={() => setShowMatcher(false)} />}
@@ -87,6 +88,23 @@ function AppInner() {
       {showAPI && <APIModal keys={apiKeys} onSave={saveApiKeys} onClose={() => setShowAPI(false)} />}
     </BrowserRouter>
   )
+}
+
+
+class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { hasError: false, error: null } }
+  static getDerivedStateFromError(e) { return { hasError: true, error: e } }
+  render() {
+    if (this.state.hasError) return (
+      <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#060606',color:'#e8e8e8',fontFamily:'system-ui',flexDirection:'column',gap:12,padding:24,textAlign:'center'}}>
+        <div style={{fontSize:32}}>⚠️</div>
+        <div style={{fontSize:16,fontWeight:600}}>Something went wrong</div>
+        <div style={{fontSize:13,color:'#555',maxWidth:400}}>{this.state.error?.message}</div>
+        <button onClick={() => window.location.href='/'} style={{padding:'8px 18px',background:'#6366f1',color:'#fff',border:'none',borderRadius:8,cursor:'pointer',fontSize:13,marginTop:8}}>Go Home</button>
+      </div>
+    )
+    return this.props.children
+  }
 }
 
 export default function App() {

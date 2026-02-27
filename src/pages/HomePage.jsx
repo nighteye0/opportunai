@@ -6,88 +6,92 @@ export default function HomePage() {
   const [tools, setTools] = useState([])
   const [email, setEmail] = useState('')
   const [subMsg, setSubMsg] = useState('')
+  const [tick, setTick] = useState(0)
 
   useEffect(() => {
     fetch('/api/jobs').then(r => r.json()).then(d => {
-      const arr = Array.isArray(d) ? d : (d.jobs || [])
-      setJobs(arr.slice(0, 6))
+      const arr = (Array.isArray(d) ? d : (d.jobs || d.data || []))
+        .filter(j => j && (j.title || j.position) && (j.company || j.employer))
+      setJobs(arr.slice(0, 7))
     }).catch(() => {})
     fetch('/api/tools').then(r => r.json()).then(d => {
-      const arr = Array.isArray(d) ? d : (d.tools || [])
+      const arr = Array.isArray(d) ? d : (d.tools || d.data || [])
       setTools(arr.slice(0, 6))
     }).catch(() => {})
+    const t = setInterval(() => setTick(n => n + 1), 3000)
+    return () => clearInterval(t)
   }, [])
 
   const handleSubscribe = async (e) => {
     e.preventDefault()
     if (!email) return
     try {
-      const r = await fetch('/api/newsletter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      })
+      const r = await fetch('/api/newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) })
       const d = await r.json()
       setSubMsg(d.message || 'You are in!')
       setEmail('')
-    } catch {
-      setSubMsg('You are in!')
-    }
+    } catch { setSubMsg('You are in!') }
   }
 
-  const categoryColors = {
-    'Full-time': 'green',
-    'Contract': 'amber',
-    'Part-time': 'purple',
-    'Remote': 'green',
-  }
+  const rotating = ['engineers', 'designers', 'marketers', 'founders', 'creators']
+  const current = rotating[tick % rotating.length]
+
+  const tagStyle = (color) => ({
+    padding: '3px 8px', borderRadius: 5, fontSize: 11, fontWeight: 500, whiteSpace: 'nowrap',
+    background: color === 'green' ? 'rgba(34,197,94,0.08)' : color === 'amber' ? 'rgba(245,158,11,0.08)' : 'rgba(255,255,255,0.04)',
+    border: `1px solid ${color === 'green' ? 'rgba(34,197,94,0.15)' : color === 'amber' ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.06)'}`,
+    color: color === 'green' ? '#22c55e' : color === 'amber' ? '#f59e0b' : '#555'
+  })
 
   return (
-    <main style={{ minHeight: '100vh' }}>
+    <main style={{ minHeight: '100vh', background: '#060606', color: '#e8e8e8', fontFamily: "'DM Sans',-apple-system,sans-serif" }}>
 
       {/* ── HERO ── */}
-      <section className="hero">
-        <div className="hero-bg" />
-        <div className="hero-grid" />
-        <div className="container" style={{ position: 'relative' }}>
+      <section style={{ paddingTop: 'calc(56px + 72px)', paddingBottom: 80, textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
 
-          <div className="a1">
-            <div className="hero-badge">
-              <span className="hero-badge-dot" />
-              117+ live opportunities updated daily
-            </div>
+        {/* Background effects */}
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(99,102,241,0.14), transparent)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)', backgroundSize: '60px 60px', maskImage: 'radial-gradient(ellipse 80% 70% at 50% 0%, black, transparent)', pointerEvents: 'none' }} />
+
+        <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px', position: 'relative' }}>
+
+          {/* Badge */}
+          <div style={{ animation: 'fadeUp 0.5s ease both', display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px 5px 8px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 100, fontSize: 12, fontWeight: 600, color: '#818cf8', marginBottom: 28 }}>
+            <span style={{ width: 6, height: 6, background: '#22c55e', borderRadius: '50%', display: 'inline-block', animation: 'pulse-dot 2s infinite' }} />
+            117+ live opportunities — updated daily
           </div>
 
-          <h1 className="hero-title a2">
-            Find remote work<br />
-            <span className="accent">built for what&apos;s next</span>
+          {/* Title */}
+          <h1 style={{ animation: 'fadeUp 0.5s 0.1s ease both', fontFamily: "'Syne','system-ui',sans-serif", fontSize: 'clamp(38px,7vw,72px)', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.05, color: '#fff', marginBottom: 20, maxWidth: 800, marginLeft: 'auto', marginRight: 'auto' }}>
+            Remote work for<br />
+            <span style={{ background: 'linear-gradient(135deg, #6366f1, #818cf8, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              {current}
+            </span>
           </h1>
 
-          <p className="hero-sub a3">
-            Curated remote jobs, AI-powered tools, and digital products — everything you need to build a career on your own terms.
+          {/* Subtitle */}
+          <p style={{ animation: 'fadeUp 0.5s 0.2s ease both', fontSize: 'clamp(15px,2vw,18px)', color: '#666', maxWidth: 500, margin: '0 auto 40px', lineHeight: 1.7 }}>
+            Curated remote jobs, AI tools, and digital products — everything for the future of work.
           </p>
 
-          <div className="hero-actions a4">
-            <Link to="/jobs" className="btn-primary">
+          {/* CTAs */}
+          <div style={{ animation: 'fadeUp 0.5s 0.3s ease both', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 56 }}>
+            <Link to="/jobs" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '13px 24px', background: '#6366f1', color: '#fff', fontWeight: 600, fontSize: 14, borderRadius: 10, textDecoration: 'none' }}>
               Browse Jobs
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </Link>
-            <Link to="/tools" className="btn-secondary">
+            <Link to="/tools" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '13px 24px', background: 'transparent', color: '#888', fontWeight: 500, fontSize: 14, borderRadius: 10, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.08)' }}>
               Explore AI Tools
             </Link>
           </div>
 
-          <div className="a5" style={{ display: 'flex', justifyContent: 'center' }}>
-            <div className="hero-stats">
-              {[
-                ['117+', 'Live Jobs'],
-                ['50+', 'AI Tools'],
-                ['50+', 'Products'],
-                ['Free', 'Forever'],
-              ].map(([num, label]) => (
-                <div key={label} className="hero-stat">
-                  <div className="hero-stat-num">{num}</div>
-                  <div className="hero-stat-label">{label}</div>
+          {/* Stats */}
+          <div style={{ animation: 'fadeUp 0.5s 0.4s ease both', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ display: 'inline-flex', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, overflow: 'hidden' }}>
+              {[['117+','Live Jobs'],['50+','AI Tools'],['50+','Products'],['Free','Always']].map(([num, label], i) => (
+                <div key={label} style={{ padding: '14px 28px', textAlign: 'center', borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+                  <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.03em' }}>{num}</div>
+                  <div style={{ fontSize: 11, color: '#444', fontWeight: 500, marginTop: 1, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
                 </div>
               ))}
             </div>
@@ -96,75 +100,78 @@ export default function HomePage() {
       </section>
 
       {/* ── JOBS ── */}
-      <section className="section" style={{ borderTop: '1px solid var(--border)' }}>
-        <div className="container">
-          <div className="section-header">
+      <section style={{ padding: '64px 0', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
             <div>
-              <div className="section-label">Opportunities</div>
-              <h2 className="section-title">Latest remote jobs</h2>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#333', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>Opportunities</div>
+              <h2 style={{ fontFamily: "'Syne',sans-serif", fontSize: 'clamp(18px,3vw,24px)', fontWeight: 800, letterSpacing: '-0.03em', color: '#fff' }}>Latest remote jobs</h2>
             </div>
-            <Link to="/jobs" className="btn-secondary" style={{ fontSize: 13, padding: '8px 16px' }}>
-              View all →
-            </Link>
+            <Link to="/jobs" style={{ padding: '8px 16px', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 13, color: '#666', textDecoration: 'none' }}>View all →</Link>
           </div>
 
-          <div className="card" style={{ overflow: 'hidden' }}>
+          <div style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, overflow: 'hidden' }}>
             {jobs.length === 0 ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="job-row" style={{ opacity: 0.3 }}>
-                  <div className="job-logo" />
-                  <div className="job-info">
-                    <div style={{ height: 12, background: 'var(--border)', borderRadius: 4, width: '40%', marginBottom: 6 }} />
-                    <div style={{ height: 10, background: 'var(--border)', borderRadius: 4, width: '25%' }} />
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', padding: '14px 18px', borderBottom: '1px solid rgba(255,255,255,0.04)', gap: 14, opacity: 0.2 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 8, background: '#222' }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ height: 11, background: '#222', borderRadius: 4, width: '38%', marginBottom: 6 }} />
+                    <div style={{ height: 9, background: '#1a1a1a', borderRadius: 4, width: '22%' }} />
                   </div>
                 </div>
               ))
-            ) : (
-              jobs.map((job, i) => (
-                <a key={i} href={job.url || job.link || '#'} target="_blank" rel="noopener noreferrer" className="job-row">
-                  <div className="job-logo">{job.company_emoji || job.emoji || '💼'}</div>
-                  <div className="job-info">
-                    <div className="job-title">{job.title || job.position}</div>
-                    <div className="job-company">{job.company} {job.location ? `· ${job.location}` : ''}</div>
-                  </div>
-                  <div className="job-tags">
-                    {job.type && <span className={`tag ${categoryColors[job.type] || ''}`}>{job.type}</span>}
-                    {job.salary && <span className="tag">{job.salary}</span>}
-                    <span className="tag green">Remote</span>
-                  </div>
-                </a>
-              ))
-            )}
+            ) : jobs.map((j, i) => (
+              <a key={i} href={j.url || j.link || j.apply_url || '#'} target="_blank" rel="noopener noreferrer"
+                style={{ display: 'flex', alignItems: 'center', padding: '14px 18px', borderBottom: i < jobs.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', gap: 14, textDecoration: 'none', color: 'inherit', transition: 'background 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: '#111', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>
+                  {j.company_emoji || j.emoji || '💼'}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#e0e0e0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.title || j.position}</div>
+                  <div style={{ fontSize: 12, color: '#444', marginTop: 2 }}>{j.company || j.employer}{j.location ? ` · ${j.location}` : ''}</div>
+                </div>
+                <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  {(j.salary || j.compensation) && <span style={tagStyle('amber')}>{j.salary || j.compensation}</span>}
+                  <span style={tagStyle('green')}>Remote</span>
+                </div>
+              </a>
+            ))}
           </div>
         </div>
       </section>
 
       {/* ── TOOLS ── */}
-      <section className="section" style={{ background: 'var(--bg2)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
-        <div className="container">
-          <div className="section-header">
+      <section style={{ padding: '64px 0', background: 'rgba(255,255,255,0.01)', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
             <div>
-              <div className="section-label">AI Stack</div>
-              <h2 className="section-title">Top AI tools this week</h2>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#333', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>AI Stack</div>
+              <h2 style={{ fontFamily: "'Syne',sans-serif", fontSize: 'clamp(18px,3vw,24px)', fontWeight: 800, letterSpacing: '-0.03em', color: '#fff' }}>Top AI tools this week</h2>
             </div>
-            <Link to="/tools" className="btn-secondary" style={{ fontSize: 13, padding: '8px 16px' }}>
-              View all →
-            </Link>
+            <Link to="/tools" style={{ padding: '8px 16px', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 13, color: '#666', textDecoration: 'none' }}>View all →</Link>
           </div>
 
-          <div className="tool-grid">
-            {(tools.length === 0 ? Array.from({ length: 6 }) : tools).map((tool, i) => (
-              tool ? (
-                <a key={i} href={tool.website || tool.url || '#'} target="_blank" rel="noopener noreferrer" className="card tool-card" style={{ textDecoration: 'none' }}>
-                  <div className="tool-card-icon">{tool.logo || tool.emoji || '🛠️'}</div>
-                  <div className="tool-card-name">{tool.name}</div>
-                  <div className="tool-card-desc">{tool.description || tool.tagline}</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(240px,1fr))', gap: 10 }}>
+            {(tools.length === 0 ? Array.from({ length: 6 }) : tools).map((t, i) => (
+              t ? (
+                <a key={i} href={t.website || t.url || '#'} target="_blank" rel="noopener noreferrer"
+                  style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 18, textDecoration: 'none', color: 'inherit', display: 'block', transition: 'all 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; e.currentTarget.style.transform = 'none' }}
+                >
+                  <div style={{ width: 40, height: 40, borderRadius: 9, background: '#111', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, marginBottom: 12 }}>{t.logo || t.emoji || '🛠️'}</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#e0e0e0', marginBottom: 4 }}>{t.name}</div>
+                  <div style={{ fontSize: 12, color: '#444', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{t.description || t.tagline}</div>
                 </a>
               ) : (
-                <div key={i} className="card tool-card" style={{ opacity: 0.3 }}>
-                  <div className="tool-card-icon" />
-                  <div style={{ height: 12, background: 'var(--border)', borderRadius: 4, width: '70%', marginBottom: 6 }} />
-                  <div style={{ height: 10, background: 'var(--border)', borderRadius: 4, width: '90%' }} />
+                <div key={i} style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 18, opacity: 0.2 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 9, background: '#222', marginBottom: 12 }} />
+                  <div style={{ height: 11, background: '#222', borderRadius: 4, width: '60%', marginBottom: 8 }} />
+                  <div style={{ height: 9, background: '#1a1a1a', borderRadius: 4, width: '85%' }} />
                 </div>
               )
             ))}
@@ -173,29 +180,24 @@ export default function HomePage() {
       </section>
 
       {/* ── NEWSLETTER ── */}
-      <section className="section">
-        <div className="container">
-          <div className="newsletter">
-            <div className="section-label" style={{ color: 'var(--accent2)', marginBottom: 8 }}>Stay ahead</div>
-            <h2 className="newsletter-title">Weekly remote opportunities</h2>
-            <p className="newsletter-sub">Get the top jobs, tools, and digital products delivered to your inbox every week. No spam.</p>
+      <section style={{ padding: '64px 0' }}>
+        <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px' }}>
+          <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(139,92,246,0.04))', border: '1px solid rgba(99,102,241,0.12)', borderRadius: 16, padding: '48px 40px', textAlign: 'center' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#818cf8', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>Stay ahead</div>
+            <h2 style={{ fontFamily: "'Syne',sans-serif", fontSize: 'clamp(18px,3vw,24px)', fontWeight: 800, letterSpacing: '-0.03em', color: '#fff', marginBottom: 10 }}>Weekly remote opportunities</h2>
+            <p style={{ fontSize: 14, color: '#555', marginBottom: 24 }}>Top jobs, tools, and products to your inbox. No spam, unsubscribe anytime.</p>
             {subMsg ? (
-              <div style={{ padding: '12px 20px', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 9, fontSize: 14, color: 'var(--green)', display: 'inline-block' }}>
-                ✓ {subMsg}
-              </div>
+              <div style={{ padding: '12px 20px', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 9, fontSize: 14, color: '#22c55e', display: 'inline-block' }}>✓ {subMsg}</div>
             ) : (
-              <form className="newsletter-form" onSubmit={handleSubscribe}>
+              <form onSubmit={handleSubscribe} style={{ display: 'flex', gap: 8, maxWidth: 400, margin: '0 auto', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <input
-                  type="email"
-                  className="newsletter-input"
+                  type="email" required
                   placeholder="you@example.com"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  required
+                  style={{ flex: 1, minWidth: 200, padding: '11px 16px', background: '#0f0f0f', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 9, color: '#e8e8e8', fontSize: 14, fontFamily: 'inherit', outline: 'none' }}
                 />
-                <button type="submit" className="btn-primary" style={{ flexShrink: 0 }}>
-                  Subscribe
-                </button>
+                <button type="submit" style={{ padding: '11px 20px', background: '#6366f1', color: '#fff', fontWeight: 600, fontSize: 14, borderRadius: 9, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>Subscribe</button>
               </form>
             )}
           </div>
@@ -203,24 +205,18 @@ export default function HomePage() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-inner">
-            <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, letterSpacing: '-0.02em', marginBottom: 4 }}>OpportuAI</div>
-              <div className="footer-copy">Built for the future of work</div>
-            </div>
-            <nav className="footer-links">
-              <Link to="/jobs">Jobs</Link>
-              <Link to="/tools">Tools</Link>
-              <Link to="/products">Products</Link>
-              <Link to="/blog">Blog</Link>
-              <Link to="/admin">Admin</Link>
-            </nav>
-            <div className="footer-copy">© 2026 OpportuAI</div>
+      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '32px 0' }}>
+        <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+          <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 15, letterSpacing: '-0.02em' }}>OpportuAI</div>
+          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+            {[['/jobs','Jobs'],['/tools','Tools'],['/products','Products'],['/blog','Blog']].map(([h,l]) => (
+              <Link key={h} to={h} style={{ fontSize: 13, color: '#444', textDecoration: 'none' }}>{l}</Link>
+            ))}
           </div>
+          <div style={{ fontSize: 12, color: '#333' }}>© 2026 OpportuAI</div>
         </div>
       </footer>
+
     </main>
   )
 }
