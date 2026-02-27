@@ -7,15 +7,19 @@ export default function HomePage() {
   const [email, setEmail] = useState('')
   const [subMsg, setSubMsg] = useState('')
   const [tick, setTick] = useState(0)
+  const [jobCount, setJobCount] = useState(0)
+  const [toolCount, setToolCount] = useState(0)
 
   useEffect(() => {
     fetch('/api/jobs').then(r => r.json()).then(d => {
       const arr = (Array.isArray(d) ? d : (d.jobs || d.data || []))
         .filter(j => j && (j.title || j.position) && (j.company || j.employer))
+      setJobCount(arr.length)
       setJobs(arr.slice(0, 7))
     }).catch(() => {})
     fetch('/api/tools').then(r => r.json()).then(d => {
       const arr = Array.isArray(d) ? d : (d.tools || d.data || [])
+      setToolCount(arr.length)
       setTools(arr.slice(0, 6))
     }).catch(() => {})
     const t = setInterval(() => setTick(n => n + 1), 3000)
@@ -58,7 +62,7 @@ export default function HomePage() {
           {/* Badge */}
           <div style={{ animation: 'fadeUp 0.5s ease both', display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px 5px 8px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 100, fontSize: 12, fontWeight: 600, color: '#818cf8', marginBottom: 28 }}>
             <span style={{ width: 6, height: 6, background: '#22c55e', borderRadius: '50%', display: 'inline-block', animation: 'pulse-dot 2s infinite' }} />
-            117+ live opportunities — updated daily
+            {jobCount > 0 ? `${jobCount}+ live opportunities` : '277+ live opportunities'} — updated daily
           </div>
 
           {/* Title */}
@@ -88,7 +92,7 @@ export default function HomePage() {
           {/* Stats */}
           <div style={{ animation: 'fadeUp 0.5s 0.4s ease both', display: 'flex', justifyContent: 'center' }}>
             <div style={{ display: 'inline-flex', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, overflow: 'hidden' }}>
-              {[['117+','Live Jobs'],['50+','AI Tools'],['50+','Products'],['Free','Always']].map(([num, label], i) => (
+              {[[jobCount > 0 ? `${jobCount}+` : '277+','Live Jobs'],[toolCount > 0 ? `${toolCount}+` : '159+','AI Tools'],['50+','Products'],['Free','Always']].map(([num, label], i) => (
                 <div key={label} style={{ padding: '14px 28px', textAlign: 'center', borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
                   <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.03em' }}>{num}</div>
                   <div style={{ fontSize: 11, color: '#444', fontWeight: 500, marginTop: 1, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
