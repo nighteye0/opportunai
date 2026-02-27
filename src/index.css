@@ -29,7 +29,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
@@ -126,7 +126,7 @@ img { max-width: 100%; height: auto; display: block; }
 }
 .nav-links a {
   padding: 6px 10px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--text2);
   border-radius: 7px;
@@ -232,7 +232,7 @@ img { max-width: 100%; height: auto; display: block; }
   background: rgba(99,102,241,0.08);
   border: 1px solid rgba(99,102,241,0.2);
   border-radius: 100px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--accent2);
   margin-bottom: 28px;
@@ -284,11 +284,11 @@ img { max-width: 100%; height: auto; display: block; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 13px 24px;
+  padding: 14px 26px;
   background: var(--accent);
   color: #fff;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 15px;
   border-radius: 10px;
   border: none;
   transition: all 0.2s;
@@ -300,11 +300,11 @@ img { max-width: 100%; height: auto; display: block; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 13px 24px;
+  padding: 14px 26px;
   background: transparent;
   color: var(--text2);
   font-weight: 500;
-  font-size: 14px;
+  font-size: 15px;
   border-radius: 10px;
   border: 1px solid var(--border);
   transition: all 0.2s;
@@ -335,13 +335,13 @@ img { max-width: 100%; height: auto; display: block; }
 }
 .hero-stat-num {
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 800;
   color: #fff;
   letter-spacing: -0.03em;
 }
 .hero-stat-label {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text3);
   font-weight: 500;
   margin-top: 1px;
@@ -352,7 +352,7 @@ img { max-width: 100%; height: auto; display: block; }
 /* ── Sections ── */
 .section { padding: 72px 0; }
 .section-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--text3);
   letter-spacing: 0.08em;
@@ -415,7 +415,7 @@ img { max-width: 100%; height: auto; display: block; }
 }
 .job-info { flex: 1; min-width: 0; }
 .job-title {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text);
   white-space: nowrap;
@@ -423,17 +423,17 @@ img { max-width: 100%; height: auto; display: block; }
   text-overflow: ellipsis;
 }
 .job-company {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text3);
   margin-top: 1px;
 }
 .job-tags { display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0; }
 .tag {
-  padding: 3px 8px;
+  padding: 4px 10px;
   background: var(--bg3);
   border: 1px solid var(--border);
   border-radius: 5px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text3);
   white-space: nowrap;
@@ -464,13 +464,13 @@ img { max-width: 100%; height: auto; display: block; }
   margin-bottom: 12px;
 }
 .tool-card-name {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text);
   margin-bottom: 4px;
 }
 .tool-card-desc {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text3);
   line-height: 1.5;
   display: -webkit-box;
@@ -496,7 +496,7 @@ img { max-width: 100%; height: auto; display: block; }
   margin-bottom: 10px;
 }
 .newsletter-sub {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text2);
   margin-bottom: 24px;
 }
@@ -535,9 +535,9 @@ img { max-width: 100%; height: auto; display: block; }
   gap: 20px;
 }
 .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
-.footer-links a { font-size: 13px; color: var(--text3); transition: color 0.15s; }
+.footer-links a { font-size: 14px; color: var(--text3); transition: color 0.15s; }
 .footer-links a:hover { color: var(--text2); }
-.footer-copy { font-size: 12px; color: var(--text3); }
+.footer-copy { font-size: 13px; color: var(--text3); }
 
 /* ── Page headers ── */
 .page-header {
@@ -552,9 +552,9 @@ img { max-width: 100%; height: auto; display: block; }
   flex-wrap: wrap;
 }
 .filter-pill {
-  padding: 6px 14px;
+  padding: 7px 16px;
   border-radius: 100px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   border: 1px solid var(--border);
   background: transparent;
@@ -573,11 +573,11 @@ img { max-width: 100%; height: auto; display: block; }
 
 /* ── Search ── */
 .search-input {
-  padding: 9px 14px;
+  padding: 10px 16px;
   background: var(--bg3);
   border: 1px solid var(--border);
   border-radius: 9px;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text);
   font-family: inherit;
   outline: none;

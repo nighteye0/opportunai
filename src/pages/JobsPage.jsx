@@ -63,7 +63,7 @@ export default function JobsPage() {
   })
 
   const tagStyle = (color) => ({
-    padding: '3px 8px', borderRadius: 5, fontSize: 11, fontWeight: 500, whiteSpace: 'nowrap',
+    padding: '3px 8px', borderRadius: 5, fontSize: 12, fontWeight: 500, whiteSpace: 'nowrap',
     background: color === 'green' ? 'rgba(34,197,94,0.08)' : color === 'amber' ? 'rgba(245,158,11,0.08)' : 'rgba(255,255,255,0.04)',
     border: `1px solid ${color === 'green' ? 'rgba(34,197,94,0.15)' : color === 'amber' ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.06)'}`,
     color: color === 'green' ? '#22c55e' : color === 'amber' ? '#f59e0b' : '#555'
@@ -77,7 +77,7 @@ export default function JobsPage() {
         <div style={{ maxWidth: 1120, margin: '0 auto' }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(34,197,94,0.7)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>Live Feed</div>
           <h1 style={{ fontFamily: "'Syne','system-ui',sans-serif", fontSize: 'clamp(22px,4vw,32px)', fontWeight: 800, letterSpacing: '-0.03em', color: '#fff', marginBottom: 4 }}>Remote Jobs</h1>
-          <p style={{ fontSize: 13, color: '#555', marginBottom: 24 }}>Updated daily from 5 sources worldwide</p>
+          <p style={{ fontSize: 15, color: '#555', marginBottom: 24 }}>Updated daily from 5 sources worldwide</p>
 
           {/* Filters */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 8 }}>
@@ -148,8 +148,8 @@ export default function JobsPage() {
                     {emoji}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: '#e0e0e0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</div>
-                    <div style={{ fontSize: 12, color: '#444', marginTop: 2 }}>{company}{j.location ? ` · ${j.location}` : ''}</div>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: '#e0e0e0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</div>
+                    <div style={{ fontSize: 13, color: '#444', marginTop: 3 }}>{company}{j.location ? ` · ${j.location}` : ''}</div>
                   </div>
                   <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                     {salary && <span style={tagStyle('amber')}>{salary}</span>}

@@ -37,7 +37,7 @@ export default function HomePage() {
   const current = rotating[tick % rotating.length]
 
   const tagStyle = (color) => ({
-    padding: '3px 8px', borderRadius: 5, fontSize: 11, fontWeight: 500, whiteSpace: 'nowrap',
+    padding: '3px 8px', borderRadius: 5, fontSize: 12, fontWeight: 500, whiteSpace: 'nowrap',
     background: color === 'green' ? 'rgba(34,197,94,0.08)' : color === 'amber' ? 'rgba(245,158,11,0.08)' : 'rgba(255,255,255,0.04)',
     border: `1px solid ${color === 'green' ? 'rgba(34,197,94,0.15)' : color === 'amber' ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.06)'}`,
     color: color === 'green' ? '#22c55e' : color === 'amber' ? '#f59e0b' : '#555'
@@ -131,8 +131,8 @@ export default function HomePage() {
                   {j.company_emoji || j.emoji || '💼'}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#e0e0e0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.title || j.position}</div>
-                  <div style={{ fontSize: 12, color: '#444', marginTop: 2 }}>{j.company || j.employer}{j.location ? ` · ${j.location}` : ''}</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: '#e0e0e0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.title || j.position}</div>
+                  <div style={{ fontSize: 13, color: '#444', marginTop: 3 }}>{j.company || j.employer}{j.location ? ` · ${j.location}` : ''}</div>
                 </div>
                 <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                   {(j.salary || j.compensation) && <span style={tagStyle('amber')}>{j.salary || j.compensation}</span>}
@@ -165,7 +165,7 @@ export default function HomePage() {
                 >
                   <div style={{ width: 40, height: 40, borderRadius: 9, background: '#111', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, marginBottom: 12 }}>{t.logo || t.emoji || '🛠️'}</div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: '#e0e0e0', marginBottom: 4 }}>{t.name}</div>
-                  <div style={{ fontSize: 12, color: '#444', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{t.description || t.tagline}</div>
+                  <div style={{ fontSize: 13, color: '#444', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{t.description || t.tagline}</div>
                 </a>
               ) : (
                 <div key={i} style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 18, opacity: 0.2 }}>
@@ -185,7 +185,7 @@ export default function HomePage() {
           <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(139,92,246,0.04))', border: '1px solid rgba(99,102,241,0.12)', borderRadius: 16, padding: '48px 40px', textAlign: 'center' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#818cf8', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>Stay ahead</div>
             <h2 style={{ fontFamily: "'Syne',sans-serif", fontSize: 'clamp(18px,3vw,24px)', fontWeight: 800, letterSpacing: '-0.03em', color: '#fff', marginBottom: 10 }}>Weekly remote opportunities</h2>
-            <p style={{ fontSize: 14, color: '#555', marginBottom: 24 }}>Top jobs, tools, and products to your inbox. No spam, unsubscribe anytime.</p>
+            <p style={{ fontSize: 15, color: '#555', marginBottom: 24 }}>Top jobs, tools, and products to your inbox. No spam, unsubscribe anytime.</p>
             {subMsg ? (
               <div style={{ padding: '12px 20px', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 9, fontSize: 14, color: '#22c55e', display: 'inline-block' }}>✓ {subMsg}</div>
             ) : (
