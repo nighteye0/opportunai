@@ -1,160 +1,969 @@
-import { createClient } from '@supabase/supabase-js'
-
-export default async function handler(req, res) {
+export default function handler(req, res) {
+  res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate')
   res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Cache-Control', 's-maxage=3600')
-
-  const fetches = await Promise.allSettled([
-    // 1. Remotive
-    fetch('https://remotive.com/api/remote-jobs?limit=25').then(r => r.json()),
-    // 2. Arbeitnow
-    fetch('https://www.arbeitnow.com/api/job-board-api?limit=25').then(r => r.json()),
-    // 3. RemoteOK
-    fetch('https://remoteok.com/api', { headers: { 'User-Agent': 'OpportuAI Job Board' } }).then(r => r.json()),
-    // 4. Himalayas
-    fetch('https://himalayas.app/jobs/api?limit=20').then(r => r.json()),
-    // 5. Jobicy (no API key needed)
-    fetch('https://jobicy.com/api/v2/remote-jobs?count=25').then(r => r.json()),
-    // 6. Supabase community
-    (async () => {
-      if (!process.env.VITE_SUPABASE_URL || !process.env.VITE_SUPABASE_ANON_KEY) return []
-      const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SUPABASE_ANON_KEY)
-      const { data } = await supabase.from('job_submissions').select('*').eq('status', 'approved').order('created_at', { ascending: false })
-      return data || []
-    })(),
-  ])
-
-  let jobs = []
-
-  // 1. Remotive
-  if (fetches[0].status === 'fulfilled') {
-    const remotive = (fetches[0].value.jobs || []).slice(0, 25).map(j => ({
-      id: `remotive-${j.id}`,
-      title: j.title,
-      company: j.company_name,
-      location: j.candidate_required_location || 'Remote',
-      type: j.job_type || 'full_time',
-      salary: j.salary || '',
-      tags: j.tags?.slice(0, 4) || [],
-      source: 'remotive',
-      logo: '🌐',
-      url: j.url,
-      postedAt: j.publication_date,
-      upvotes: 0,
-    }))
-    jobs = [...jobs, ...remotive]
+  const data = [
+  {
+    "id": "remotive-2082736",
+    "title": "Senior Amazon Brand Manager",
+    "company": "GNO Partners",
+    "location": "Remote",
+    "category": "Marketing",
+    "type": "full_time",
+    "salary": "$220k-$300k OTE",
+    "url": "https://remotive.com/remote-jobs/marketing/senior-amazon-brand-manager-2082736",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-26T07:45:46"
+  },
+  {
+    "id": "remotive-2088639",
+    "title": "🇩🇪 Account Director (m/w/d)",
+    "company": "VONQ NL",
+    "location": "Remote",
+    "category": "Sales / Business",
+    "type": "full_time",
+    "salary": "",
+    "url": "https://remotive.com/remote-jobs/sales-business/account-director-m-w-d-2088639",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-25T15:29:13"
+  },
+  {
+    "id": "remotive-2088611",
+    "title": "Product, Platform & Enterprise Front End Sr/Staff Software Engineer",
+    "company": "BNSF Railway",
+    "location": "Remote",
+    "category": "Software Development",
+    "type": "full_time",
+    "salary": "$165k - $300k",
+    "url": "https://remotive.com/remote-jobs/software-development/product-platform-enterprise-front-end-sr-staff-software-engineer-2088611",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-23T22:31:53"
+  },
+  {
+    "id": "remotive-2088612",
+    "title": "Product, Platform & Enterprise Full Stack Sr/Staff Software Engineer",
+    "company": "BNSF Railway",
+    "location": "Remote",
+    "category": "Software Development",
+    "type": "full_time",
+    "salary": "$165,000 - $300,000",
+    "url": "https://remotive.com/remote-jobs/software-development/product-platform-enterprise-full-stack-sr-staff-software-engineer-2088612",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-23T22:31:44"
+  },
+  {
+    "id": "remotive-2088613",
+    "title": "Sr/Staff AI Engineer",
+    "company": "BNSF Railway",
+    "location": "Remote",
+    "category": "AI / ML",
+    "type": "full_time",
+    "salary": "$165k - $300k",
+    "url": "https://remotive.com/remote-jobs/ai-ml/sr-staff-ai-engineer-2088613",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-23T22:31:37"
+  },
+  {
+    "id": "remotive-2088637",
+    "title": "Red Team Specialist (Offensive Security)",
+    "company": "Lumitekno Kreasi Global",
+    "location": "Remote",
+    "category": "DevOps / Sysadmin",
+    "type": "full_time",
+    "salary": "$65K - $80K",
+    "url": "https://remotive.com/remote-jobs/devops/red-team-specialist-offensive-security-2088637",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-23T10:52:54"
+  },
+  {
+    "id": "remotive-2088635",
+    "title": "Order Management and Operations Manager",
+    "company": "Exaware",
+    "location": "Remote",
+    "category": "Project Management",
+    "type": "full_time",
+    "salary": "$50K-$60K",
+    "url": "https://remotive.com/remote-jobs/project-management/order-management-and-operations-manager-2088635",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-19T13:06:05"
+  },
+  {
+    "id": "remotive-2088634",
+    "title": "AI-Native Cloud Infrastructure Generalist (m/f/d)",
+    "company": "shopware AG",
+    "location": "Remote",
+    "category": "AI / ML",
+    "type": "full_time",
+    "salary": "",
+    "url": "https://remotive.com/remote-jobs/ai-ml/ai-native-cloud-infrastructure-generalist-m-f-d-2088634",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-19T13:03:51"
+  },
+  {
+    "id": "remotive-2070150",
+    "title": "Senior DevOps Engineer",
+    "company": "Marketerx",
+    "location": "Remote",
+    "category": "DevOps / Sysadmin",
+    "type": "full_time",
+    "salary": "$130k - $150k",
+    "url": "https://remotive.com/remote-jobs/devops/senior-devops-engineer-2070150",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-18T14:31:29"
+  },
+  {
+    "id": "remotive-2088631",
+    "title": "Full-Stack Developer (6 months, extendable)",
+    "company": "Fluence International, Inc.",
+    "location": "Remote",
+    "category": "Software Development",
+    "type": "contract",
+    "salary": "$3,5k–$5k/month",
+    "url": "https://remotive.com/remote-jobs/software-development/full-stack-developer-6-months-extendable-2088631",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-18T08:36:41"
+  },
+  {
+    "id": "remotive-2086826",
+    "title": "Client Support Specialist",
+    "company": "Clipboard Health",
+    "location": "Remote",
+    "category": "Customer Service",
+    "type": "full_time",
+    "salary": "",
+    "url": "https://remotive.com/remote-jobs/customer-service/client-support-specialist-2086826",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-16T14:05:25"
+  },
+  {
+    "id": "remotive-1919266",
+    "title": "Senior Independent AI Engineer / Architect",
+    "company": "A.Team",
+    "location": "Remote",
+    "category": "Software Development",
+    "type": "contract",
+    "salary": "$120 - $170 /hour",
+    "url": "https://remotive.com/remote-jobs/software-development/senior-independent-ai-engineer-architect-1919266",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-16T10:16:38"
+  },
+  {
+    "id": "remotive-1919265",
+    "title": "Senior Independent Software Developer",
+    "company": "A.Team",
+    "location": "Remote",
+    "category": "Software Development",
+    "type": "contract",
+    "salary": "$90 - $150 /hour",
+    "url": "https://remotive.com/remote-jobs/software-development/senior-independent-software-developer-1919265",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-16T10:16:29"
+  },
+  {
+    "id": "remotive-2069746",
+    "title": "Tech Lead Full-Stack Rails Engineer",
+    "company": "Mitre Media",
+    "location": "Remote",
+    "category": "Software Development",
+    "type": "full_time",
+    "salary": "$170k - $200k",
+    "url": "https://remotive.com/remote-jobs/software-development/tech-lead-full-stack-rails-engineer-2069746",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-14T20:46:44"
+  },
+  {
+    "id": "remotive-2069747",
+    "title": "Tech Lead Databricks Data Engineer",
+    "company": "Mitre Media",
+    "location": "Remote",
+    "category": "Software Development",
+    "type": "full_time",
+    "salary": "$160k - $180k",
+    "url": "https://remotive.com/remote-jobs/software-development/tech-lead-databricks-data-engineer-2069747",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-14T20:46:35"
+  },
+  {
+    "id": "remotive-2087694",
+    "title": "AI Trainer",
+    "company": "Anuttacon",
+    "location": "Remote",
+    "category": "AI / ML",
+    "type": "contract",
+    "salary": "",
+    "url": "https://remotive.com/remote-jobs/ai-ml/ai-trainer-2087694",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-12T21:01:01"
+  },
+  {
+    "id": "remotive-1680495",
+    "title": "Office Assistant",
+    "company": "Coalition Technologies ",
+    "location": "Remote",
+    "category": "Marketing",
+    "type": "full_time",
+    "salary": "$31,2k- $52k",
+    "url": "https://remotive.com/remote-jobs/marketing/office-assistant-1680495",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-11T20:16:31"
+  },
+  {
+    "id": "remotive-1956455",
+    "title": "iOS Developer",
+    "company": "nooro",
+    "location": "Remote",
+    "category": "Software Development",
+    "type": "full_time",
+    "salary": "$60k-$130k (depending on experience)",
+    "url": "https://remotive.com/remote-jobs/software-development/ios-developer-1956455",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-09T21:15:55"
+  },
+  {
+    "id": "remotive-2086540",
+    "title": "Inside Sales Contractor",
+    "company": "Credit Wellness, LLC",
+    "location": "Remote",
+    "category": "Sales / Business",
+    "type": "full_time",
+    "salary": "OTE $25k - $35k",
+    "url": "https://remotive.com/remote-jobs/sales-business/inside-sales-contractor-2086540",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-08T22:01:13"
+  },
+  {
+    "id": "remotive-2088624",
+    "title": "Senior Python Backend Developer",
+    "company": "SKYCATCHFIRE",
+    "location": "Remote",
+    "category": "Software Development",
+    "type": "full_time",
+    "salary": "$100k - $150k",
+    "url": "https://remotive.com/remote-jobs/software-development/senior-python-backend-developer-2088624",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-06T22:41:25"
+  },
+  {
+    "id": "remotive-2088622",
+    "title": "Content Reviewer",
+    "company": "TELUS Digital",
+    "location": "Remote",
+    "category": "All others",
+    "type": "part_time",
+    "salary": "14$/hour",
+    "url": "https://remotive.com/remote-jobs/all-others/content-reviewer-2088622",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-06T16:14:35"
+  },
+  {
+    "id": "remotive-1185979",
+    "title": "Freelance Writer",
+    "company": "IAPWE",
+    "location": "Remote",
+    "category": "Writing",
+    "type": "freelance",
+    "salary": "$50-$75 /hour",
+    "url": "https://remotive.com/remote-jobs/writing/freelance-writer-1185979",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-04T17:01:32"
+  },
+  {
+    "id": "remotive-2088618",
+    "title": "AI Internet Rater",
+    "company": "Welo Data",
+    "location": "Remote",
+    "category": "AI / ML",
+    "type": "part_time",
+    "salary": "$14.5/hour",
+    "url": "https://remotive.com/remote-jobs/ai-ml/ai-internet-rater-2088618",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-04T08:43:19"
+  },
+  {
+    "id": "remotive-1749306",
+    "title": "Copywriter",
+    "company": "Coalition Technologies ",
+    "location": "Remote",
+    "category": "Writing",
+    "type": "freelance",
+    "salary": "$20k -$35k",
+    "url": "https://remotive.com/remote-jobs/writing/copywriter-1749306",
+    "emoji": "💼",
+    "source": "Remotive",
+    "posted_at": "2026-02-02T20:00:50"
+  },
+  {
+    "id": "hn-",
+    "title": "Software Engineer",
+    "company": "Let&#x27;s Support the Country: Who’s Hiring In The Coronavi",
+    "location": "Remote",
+    "category": "Engineering",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://news.ycombinator.com/item?id=",
+    "emoji": "🟠",
+    "source": "Hacker News",
+    "posted_at": "2026-02-27T11:18:03.061154+00:00"
+  },
+  {
+    "id": "reddit-1rg3nb5",
+    "title": "Need WFH jobs",
+    "company": "Priyank74",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/remotework/comments/1rg3nb5/need_wfh_jobs/",
+    "emoji": "🔴",
+    "source": "r/remotework",
+    "posted_at": "2026-02-27T10:57:56+00:00"
+  },
+  {
+    "id": "reddit-1rg340c",
+    "title": "extremely desperate to find any job",
+    "company": "SpecialistWriting708",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/remotework/comments/1rg340c/extremely_desperate_to_find_any_job/",
+    "emoji": "🔴",
+    "source": "r/remotework",
+    "posted_at": "2026-02-27T10:26:49+00:00"
+  },
+  {
+    "id": "reddit-1rg31bd",
+    "title": "Remote Posting Tasks – Easy Marketing Jobs with Hundreds of Posts Daily",
+    "company": "wangsj-",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/remotework/comments/1rg31bd/remote_posting_tasks_easy_marketing_jobs_with/",
+    "emoji": "🔴",
+    "source": "r/remotework",
+    "posted_at": "2026-02-27T10:22:22+00:00"
+  },
+  {
+    "id": "reddit-1rg2da3",
+    "title": "Job creation and partnership",
+    "company": "LoudBid7398",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/remotework/comments/1rg2da3/job_creation_and_partnership/",
+    "emoji": "🔴",
+    "source": "r/remotework",
+    "posted_at": "2026-02-27T09:42:29+00:00"
+  },
+  {
+    "id": "reddit-1rg0er9",
+    "title": "Looking for a small start: LinkedIn management or high-level email setup (honest post)",
+    "company": "meenarii",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/remotework/comments/1rg0er9/looking_for_a_small_start_linkedin_management_or/",
+    "emoji": "🔴",
+    "source": "r/remotework",
+    "posted_at": "2026-02-27T07:42:56+00:00"
+  },
+  {
+    "id": "reddit-1rg07np",
+    "title": "What daily habits help you stay productive while working remotely?",
+    "company": "buildbrand4ubetter",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/remotework/comments/1rg07np/what_daily_habits_help_you_stay_productive_while/",
+    "emoji": "🔴",
+    "source": "r/remotework",
+    "posted_at": "2026-02-27T07:30:54+00:00"
+  },
+  {
+    "id": "reddit-1rfx5bw",
+    "title": "[FOR HIRE] Data Entry &amp; Virtual Assistant | 5–6 hrs/day | $3/hr | Seeking Direct Client",
+    "company": "unregula",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/remotework/comments/1rfx5bw/for_hire_data_entry_virtual_assistant_56_hrsday/",
+    "emoji": "🔴",
+    "source": "r/remotework",
+    "posted_at": "2026-02-27T04:42:49+00:00"
+  },
+  {
+    "id": "reddit-1rfx25y",
+    "title": "What are the best sites for finding remote work?",
+    "company": "nomadicsamiam",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/remotework/comments/1rfx25y/what_are_the_best_sites_for_finding_remote_work/",
+    "emoji": "🔴",
+    "source": "r/remotework",
+    "posted_at": "2026-02-27T04:38:24+00:00"
+  },
+  {
+    "id": "reddit-1rfwcrk",
+    "title": "Looking for remote work",
+    "company": "Sweet_Upstairs_7749",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/remotework/comments/1rfwcrk/looking_for_remote_work/",
+    "emoji": "🔴",
+    "source": "r/remotework",
+    "posted_at": "2026-02-27T04:03:03+00:00"
+  },
+  {
+    "id": "reddit-1rftzy0",
+    "title": "EOR for hiring in Germany specifically, any recommendations?",
+    "company": "LauraBeth034",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/remotework/comments/1rftzy0/eor_for_hiring_in_germany_specifically_any/",
+    "emoji": "🔴",
+    "source": "r/remotework",
+    "posted_at": "2026-02-27T02:13:49+00:00"
+  },
+  {
+    "id": "reddit-1rftf38",
+    "title": "[Hiring] – US &amp; EU Based Remote Assistants $300-$500/ month",
+    "company": "Appropriate_Wall_503",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/remotework/comments/1rftf38/hiring_us_eu_based_remote_assistants_300500_month/",
+    "emoji": "🔴",
+    "source": "r/remotework",
+    "posted_at": "2026-02-27T01:47:58+00:00"
+  },
+  {
+    "id": "reddit-1rfsp73",
+    "title": "92 million jobs will be displaced",
+    "company": "Worldly-Acadia7819",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/remotework/comments/1rfsp73/92_million_jobs_will_be_displaced/",
+    "emoji": "🔴",
+    "source": "r/remotework",
+    "posted_at": "2026-02-27T01:15:45+00:00"
+  },
+  {
+    "id": "reddit-1rg2f1d",
+    "title": "[FOR HIRE] Graphic Designer available for logos, branding &amp; social media content",
+    "company": "Alex225_",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rg2f1d/for_hire_graphic_designer_available_for_logos/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-27T09:45:34+00:00"
+  },
+  {
+    "id": "reddit-1rg21l0",
+    "title": "[For Hire] Logo and Visual Identity Graphic Designer",
+    "company": "moonletdesignstuff",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rg21l0/for_hire_logo_and_visual_identity_graphic_designer/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-27T09:22:47+00:00"
+  },
+  {
+    "id": "reddit-1rg1vtb",
+    "title": "[HIRING] Sales Development Representative (Outbound SaaS)",
+    "company": "Asleep-Ad174",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rg1vtb/hiring_sales_development_representative_outbound/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-27T09:13:05+00:00"
+  },
+  {
+    "id": "reddit-1rg1flm",
+    "title": "[For hire] For brands/personal accounts Social Media Marketing | Management | Virtual Assistant",
+    "company": "Old_Link7502",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rg1flm/for_hire_for_brandspersonal_accounts_social_media/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-27T08:46:08+00:00"
+  },
+  {
+    "id": "reddit-1rfyh54",
+    "title": "[FOR HIRE] Growth Marketing Agency | SEO + Paid Ads + Performance Analytics | Remote",
+    "company": "translasukk",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfyh54/for_hire_growth_marketing_agency_seo_paid_ads/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-27T05:51:45+00:00"
+  },
+  {
+    "id": "reddit-1rfxru2",
+    "title": "[Hiring] Commission Sales Rep – $400–$5,000 Per Deal (Las Vegas Nightlife)",
+    "company": "Connect-Emphasis7354",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfxru2/hiring_commission_sales_rep_4005000_per_deal_las/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-27T05:14:34+00:00"
+  },
+  {
+    "id": "reddit-1rfxkgj",
+    "title": "[For hire] CAD and Ansys Specialist",
+    "company": "Good-Writer1551",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfxkgj/for_hire_cad_and_ansys_specialist/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-27T05:04:00+00:00"
+  },
+  {
+    "id": "reddit-1rfxi0y",
+    "title": "[Hiring] (LA) Sales Photographer | 18$/hr - 60$/hr | On site | No Exp needed",
+    "company": "v0kk3r",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfxi0y/hiring_la_sales_photographer_18hr_60hr_on_site_no/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-27T05:00:52+00:00"
+  },
+  {
+    "id": "reddit-1rfx3mo",
+    "title": "[hiring] Indie Studio – Team Recruitment (India Only)",
+    "company": "Shaurya0458",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfx3mo/hiring_indie_studio_team_recruitment_india_only/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-27T04:40:25+00:00"
+  },
+  {
+    "id": "reddit-1rfwhe2",
+    "title": "[For Hire] Experienced Virtual/Executive Assistant",
+    "company": "Lonely-Ad-3032",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfwhe2/for_hire_experienced_virtualexecutive_assistant/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-27T04:09:25+00:00"
+  },
+  {
+    "id": "reddit-1rfvtw6",
+    "title": "[HIRING] easy business undergrad paper",
+    "company": "araffleticket97",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfvtw6/hiring_easy_business_undergrad_paper/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-27T03:37:30+00:00"
+  },
+  {
+    "id": "reddit-1rftvfa",
+    "title": "[FOR HIRE] Illustrating People, OCs, and Fan Art | Fantasy, D&amp;D, Sci-Fi, Cyberpunk, Etc. (Fixed ",
+    "company": "Extrarium",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rftvfa/for_hire_illustrating_people_ocs_and_fan_art/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-27T02:08:06+00:00"
+  },
+  {
+    "id": "reddit-1rfr3q1",
+    "title": "[For Hire] $300/mo for marketing. Clear expectations before contract &amp; fast communication from M",
+    "company": "sahil_meena",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfr3q1/for_hire_300mo_for_marketing_clear_expectations/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-27T00:07:20+00:00"
+  },
+  {
+    "id": "reddit-1rfquok",
+    "title": "[FOR HIRE] I turn ideas into visuals - Graphic designer available for projects",
+    "company": "No_Future444",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfquok/for_hire_i_turn_ideas_into_visuals_graphic/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-26T23:57:23+00:00"
+  },
+  {
+    "id": "reddit-1rfq516",
+    "title": "[For Hire] Arabic Writer | $10 per 500 words | $8/hr",
+    "company": "Deep_Chair_5062",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfq516/for_hire_arabic_writer_10_per_500_words_8hr/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-26T23:28:03+00:00"
+  },
+  {
+    "id": "reddit-1rfpnv8",
+    "title": "[For Hire] Proof-Reader, Spanish to English translator, and writer.",
+    "company": "VeronicaRxx",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfpnv8/for_hire_proofreader_spanish_to_english/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-26T23:09:10+00:00"
+  },
+  {
+    "id": "reddit-1rfoyrz",
+    "title": "[Hiring] Full time developers",
+    "company": "crazmyth",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfoyrz/hiring_full_time_developers/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-26T22:42:02+00:00"
+  },
+  {
+    "id": "reddit-1rfoyfm",
+    "title": "[for hire] proofreader $15-40/hr",
+    "company": "No-Day332",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfoyfm/for_hire_proofreader_1540hr/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-26T22:41:38+00:00"
+  },
+  {
+    "id": "reddit-1rfn9gz",
+    "title": "[Hiring] Senior Developer – Baltimore, MD or Wilmington, DE",
+    "company": "NYC_Blasian",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfn9gz/hiring_senior_developer_baltimore_md_or/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-26T21:36:58+00:00"
+  },
+  {
+    "id": "reddit-1rfjobn",
+    "title": "[For Hire] Hard working and flexible professional",
+    "company": "BoriDjinn",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfjobn/for_hire_hard_working_and_flexible_professional/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-26T19:24:02+00:00"
+  },
+  {
+    "id": "reddit-1rfjg3v",
+    "title": "[Hiring] Accounting Firm",
+    "company": "throwawayforthegroom",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfjg3v/hiring_accounting_firm/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-26T19:15:42+00:00"
+  },
+  {
+    "id": "reddit-1rfj3kr",
+    "title": "[For Hire] Executive Virtual Assistant",
+    "company": "MotorFew6387",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfj3kr/for_hire_executive_virtual_assistant/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-26T19:03:10+00:00"
+  },
+  {
+    "id": "reddit-1rfj2cc",
+    "title": "[For Hire] 3D animation and CGI for product, brands, visuals for artists, DJ´s, etc) and graphic des",
+    "company": "cinnamon_mango",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfj2cc/for_hire_3d_animation_and_cgi_for_product_brands/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-26T19:01:57+00:00"
+  },
+  {
+    "id": "reddit-1rfhscj",
+    "title": "[FOR HIRE] Tired of Google Ads Underperformance?",
+    "company": "nyaborker",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfhscj/for_hire_tired_of_google_ads_underperformance/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-26T18:15:31+00:00"
+  },
+  {
+    "id": "reddit-1rfhrp0",
+    "title": "[For Hire] Graphic Designer for Book Cover Typography + Layout ($60/hr)",
+    "company": "therealnightbadger",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/forhire/comments/1rfhrp0/for_hire_graphic_designer_for_book_cover/",
+    "emoji": "🔴",
+    "source": "r/forhire",
+    "posted_at": "2026-02-26T18:14:48+00:00"
+  },
+  {
+    "id": "reddit-1ovi3d8",
+    "title": "[FOR HIRE] Everybody taking or enrolling in flexpath RN-BSN in one billing cycle reachout to have yo",
+    "company": "Prominent-tutor-8761",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/jobbit/comments/1ovi3d8/for_hire_everybody_taking_or_enrolling_in/",
+    "emoji": "🔴",
+    "source": "r/jobbit",
+    "posted_at": "2025-11-12T21:28:49+00:00"
+  },
+  {
+    "id": "reddit-1ovgsjs",
+    "title": "Hiring",
+    "company": "Physical_Beach7711",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/jobbit/comments/1ovgsjs/hiring/",
+    "emoji": "🔴",
+    "source": "r/jobbit",
+    "posted_at": "2025-11-12T20:40:16+00:00"
+  },
+  {
+    "id": "reddit-1ovcgfq",
+    "title": "[FOR HIRE] W/A +16124964376 or Discord perfect_tutors for HELP in your CAPELLA,WALDEN,WGU, RN-BSN,RN",
+    "company": "Prominent-tutor-8761",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/jobbit/comments/1ovcgfq/for_hire_wa_16124964376_or_discord_perfect_tutors/",
+    "emoji": "🔴",
+    "source": "r/jobbit",
+    "posted_at": "2025-11-12T18:02:56+00:00"
+  },
+  {
+    "id": "reddit-1ovb0e8",
+    "title": "[For Hire] Professional Graphic Designer",
+    "company": "Local-Ostrich426",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/jobbit/comments/1ovb0e8/for_hire_professional_graphic_designer/",
+    "emoji": "🔴",
+    "source": "r/jobbit",
+    "posted_at": "2025-11-12T17:11:30+00:00"
+  },
+  {
+    "id": "reddit-1ovamn6",
+    "title": "[Hiring] [Remote] [CET plus or minus 3 HOURS] - Senior Data Engineer (Azure) at Proxify (💸 $50k-$80K",
+    "company": "rdutel",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/jobbit/comments/1ovamn6/hiring_remote_cet_plus_or_minus_3_hours_senior/",
+    "emoji": "🔴",
+    "source": "r/jobbit",
+    "posted_at": "2025-11-12T16:58:41+00:00"
+  },
+  {
+    "id": "reddit-1ovajl1",
+    "title": "I am looking for people who can become both employees and friends.",
+    "company": "Moldash_Ismail",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/jobbit/comments/1ovajl1/i_am_looking_for_people_who_can_become_both/",
+    "emoji": "🔴",
+    "source": "r/jobbit",
+    "posted_at": "2025-11-12T16:55:41+00:00"
+  },
+  {
+    "id": "reddit-1ovafhl",
+    "title": "All Social Media Marketers — Here’s How You Can Instantly Increase Your Package Value (No Agency Pit",
+    "company": "the_Spider_459",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/jobbit/comments/1ovafhl/all_social_media_marketers_heres_how_you_can/",
+    "emoji": "🔴",
+    "source": "r/jobbit",
+    "posted_at": "2025-11-12T16:51:34+00:00"
+  },
+  {
+    "id": "reddit-1ova486",
+    "title": "[Hiring] Earn 50% from each payment you receive — Remote Opportunity",
+    "company": "Ok_Biscotti_177",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/jobbit/comments/1ova486/hiring_earn_50_from_each_payment_you_receive/",
+    "emoji": "🔴",
+    "source": "r/jobbit",
+    "posted_at": "2025-11-12T16:39:48+00:00"
+  },
+  {
+    "id": "reddit-1ov9egq",
+    "title": "anyone here looking for a chill side hustle that actually works?",
+    "company": "opal_whispers",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/jobbit/comments/1ov9egq/anyone_here_looking_for_a_chill_side_hustle_that/",
+    "emoji": "🔴",
+    "source": "r/jobbit",
+    "posted_at": "2025-11-12T16:13:18+00:00"
+  },
+  {
+    "id": "reddit-1ov8yqc",
+    "title": "badly need a remote job",
+    "company": "jollyhotdog__",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/jobbit/comments/1ov8yqc/badly_need_a_remote_job/",
+    "emoji": "🔴",
+    "source": "r/jobbit",
+    "posted_at": "2025-11-12T15:57:41+00:00"
+  },
+  {
+    "id": "reddit-1ov8wio",
+    "title": "[HIRING] Virtual Assistant for X/Twitter",
+    "company": "lara2883",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/jobbit/comments/1ov8wio/hiring_virtual_assistant_for_xtwitter/",
+    "emoji": "🔴",
+    "source": "r/jobbit",
+    "posted_at": "2025-11-12T15:55:25+00:00"
+  },
+  {
+    "id": "reddit-1ov8v8o",
+    "title": "[HIRING] looking for people for affiliate marketing Europe only",
+    "company": "Critical_Moment4599",
+    "location": "Remote",
+    "category": "Other",
+    "type": "Full-time",
+    "salary": "",
+    "url": "https://reddit.com/r/jobbit/comments/1ov8v8o/hiring_looking_for_people_for_affiliate_marketing/",
+    "emoji": "🔴",
+    "source": "r/jobbit",
+    "posted_at": "2025-11-12T15:54:04+00:00"
   }
-
-  // 2. Arbeitnow
-  if (fetches[1].status === 'fulfilled') {
-    const arbeit = (fetches[1].value.data || []).slice(0, 25).map(j => ({
-      id: `arbeit-${j.slug}`,
-      title: j.title,
-      company: j.company_name,
-      location: j.location || 'Remote',
-      type: j.job_types?.[0] || 'full-time',
-      salary: '',
-      tags: j.tags?.slice(0, 4) || [],
-      source: 'arbeitnow',
-      logo: '💼',
-      url: j.url,
-      postedAt: j.created_at,
-      upvotes: 0,
-    }))
-    jobs = [...jobs, ...arbeit]
-  }
-
-  // 3. RemoteOK
-  if (fetches[2].status === 'fulfilled') {
-    const rok = (Array.isArray(fetches[2].value) ? fetches[2].value : [])
-      .filter(j => j.id)
-      .slice(0, 20)
-      .map(j => ({
-        id: `rok-${j.id}`,
-        title: j.position,
-        company: j.company,
-        location: 'Remote',
-        type: 'full-time',
-        salary: j.salary || '',
-        tags: j.tags?.slice(0, 4) || [],
-        source: 'remoteok',
-        logo: '🖥️',
-        url: j.url ? (j.url.startsWith('http') ? j.url : `https://remoteok.com${j.url}`) : '#',
-        postedAt: new Date(j.epoch * 1000).toISOString(),
-        upvotes: 0,
-      }))
-    jobs = [...jobs, ...rok]
-  }
-
-  // 4. Himalayas
-  if (fetches[3].status === 'fulfilled') {
-    const himalaya = (fetches[3].value.jobs || []).slice(0, 20).map(j => {
-      let salary = ''
-      if (j.minSalary && j.maxSalary) salary = `$${Math.round(j.minSalary/1000)}k-$${Math.round(j.maxSalary/1000)}k`
-      else if (j.minSalary) salary = `From $${Math.round(j.minSalary/1000)}k`
-      return {
-        id: `himalaya-${j.id || j.slug}`,
-        title: j.title,
-        company: j.companyName || j.company?.name || 'Unknown',
-        location: j.locationRestrictions?.join(', ') || 'Remote',
-        type: j.employmentType || 'Full Time',
-        salary,
-        tags: j.categories?.slice(0, 4) || [],
-        source: 'himalayas',
-        logo: '🏔️',
-        url: j.applicationLink || j.url || `https://himalayas.app/jobs/${j.slug}`,
-        postedAt: j.createdAt || new Date().toISOString(),
-        upvotes: 0,
-      }
-    })
-    jobs = [...jobs, ...himalaya]
-  }
-
-  // 5. Jobicy
-  if (fetches[4].status === 'fulfilled') {
-    const jobicy = (fetches[4].value.jobs || []).slice(0, 25).map(j => {
-      let salary = ''
-      if (j.annualSalaryMin && j.annualSalaryMax) {
-        salary = `$${Math.round(j.annualSalaryMin/1000)}k-$${Math.round(j.annualSalaryMax/1000)}k`
-      } else if (j.annualSalaryMin) {
-        salary = `From $${Math.round(j.annualSalaryMin/1000)}k`
-      }
-      return {
-        id: `jobicy-${j.id}`,
-        title: j.jobTitle,
-        company: j.companyName,
-        location: j.jobGeo || 'Anywhere',
-        type: j.jobType || 'full-time',
-        salary,
-        tags: [j.jobIndustry].filter(Boolean).slice(0, 4),
-        source: 'jobicy',
-        logo: '🔎',
-        url: j.url,
-        postedAt: j.pubDate,
-        upvotes: 0,
-      }
-    })
-    jobs = [...jobs, ...jobicy]
-  }
-
-  // 6. Community (Supabase)
-  if (fetches[5].status === 'fulfilled' && Array.isArray(fetches[5].value)) {
-    const community = fetches[5].value.map(j => ({
-      id: `community-${j.id}`,
-      title: j.title,
-      company: j.company,
-      location: j.location,
-      type: j.type,
-      salary: j.salary || '',
-      tags: j.tags || [],
-      source: 'community',
-      logo: j.logo || '🏢',
-      url: j.url || '#',
-      postedAt: j.created_at,
-      upvotes: 0,
-    }))
-    jobs = [...community, ...jobs]
-  }
-
-  res.status(200).json({ jobs })
+]
+  res.status(200).json({ jobs: data, total: data.length, updated: '2026-02-27T11:18:11.958445+00:00' })
 }
